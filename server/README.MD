@@ -39,6 +39,7 @@ type RoomState struct {
 ```
 
 ###二，支持的数据库操作方法
+
 1. 用户方法
 ```
 // 添加用户，需要传入一个user指针，返回数据库实际操作的行数和一个错误信息
@@ -84,6 +85,7 @@ func DelRoomStatesByRoomNum(roomNum int, startTime, endTime int64) (int64, error
 ```
 
 ###二，通讯消息结构和消息类型设计
+
 1，先定义外层消息结构，再根据具体消息类型定义详细的消息结构
 ```
 // 定义消息结构体
@@ -93,6 +95,7 @@ type Message struct {
 	Data string `json:"data"` // 具体的消息数据
 }
 ```
+
 2，具体的消息类型，每一个客户端发送的消息类型都对应一个服务端返回的消息类型
 ```
 const (
@@ -121,6 +124,7 @@ const (
 	TypeRoomStateDeleteRes = "RoomStateDeleteRes"
 )
 ```
+
 3，具体的消息结构
 ```
 // 用户注册消息结构体
@@ -151,6 +155,7 @@ type AirModifyRes struct {
 ```
 
 ###三，处理服务端和客户端的通信问题
+
 1，主函数，初始化连接池、等待与客户端连接，每当侦听到客户端的连接请求，就启动一个协程，维持和客户端的连接
 ```
 func main() {
@@ -175,6 +180,7 @@ func mainProcess(conn net.Conn) {
 	err := processor.Process()
 }
 ```
+
 2,主调度器，用于根据客户端发送的消息类型来分配给具体的处理器进行处理
 ```
 // 主调度器结构，维持一个从主函数中获取的连接
@@ -222,6 +228,7 @@ func (this *UserProcessor) ProcessUserQuery(msg *message.Message) (err error) {}
 ```
 
 ###小工具
+
 1,utils中实现了具体的读写方法，其中读取消息的时候会先判断消息长度是否和结构体内的消息长度一致，如果不一致，认为消息损坏，直接丢弃
 ```
 // 定义一个传输结构体，以便绑定读写方法到一个连接上
