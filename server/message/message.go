@@ -1,6 +1,6 @@
 package message
 
-import "AirConditioner/server/model"
+import "github.com/wxmsummer/airConditioner/server/model"
 
 // 消息类型
 const (

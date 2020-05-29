@@ -1,9 +1,9 @@
 package main
 
 import (
-	"AirConditioner/server/Processor"
-	"AirConditioner/server/db"
 	"fmt"
+	"github.com/wxmsummer/airConditioner/server/Processor"
+	"github.com/wxmsummer/airConditioner/server/db"
 	"net"
 	"time"
 )

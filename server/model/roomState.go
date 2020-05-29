@@ -1,8 +1,8 @@
 package model
 
 import (
-	"AirConditioner/server/db"
 	"fmt"
+	"github.com/wxmsummer/airConditioner/server/db"
 )
 
 // 房间状态结构体，记录房间号、开始时间、结束时间，以及这段时间内的温度和费用、耗电量

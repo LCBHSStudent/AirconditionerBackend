@@ -1,9 +1,9 @@
 package Processor
 
 import (
-	"AirConditioner/server/message"
-	"AirConditioner/server/utils"
 	"fmt"
+	"github.com/wxmsummer/airConditioner/server/message"
+	"github.com/wxmsummer/airConditioner/server/utils"
 	"io"
 	"net"
 )
@@ -16,7 +16,7 @@ type MainProcessor struct {
 func (this *MainProcessor) Process() (err error) {
 	conn := this.Conn
 	for {
-		tf := &utils.Transfer{Conn: conn,}
+		tf := &utils.Transfer{Conn: conn}
 		msg, err := tf.ReadPkg()
 		if err != nil {
 			if err == io.EOF {

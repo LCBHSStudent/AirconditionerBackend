@@ -1,8 +1,8 @@
 package model
 
 import (
-	"AirConditioner/server/db"
 	"fmt"
+	"github.com/wxmsummer/airConditioner/server/db"
 	"strconv"
 )
 

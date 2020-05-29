@@ -1,6 +1,6 @@
 package model
 
-import "github.com/pkg/errors"
+import "errors"
 
 // 根据业务逻辑需要，自定义一些错误
 var (

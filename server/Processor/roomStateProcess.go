@@ -1,11 +1,11 @@
 package Processor
 
 import (
-	"AirConditioner/server/message"
-	"AirConditioner/server/model"
-	"AirConditioner/server/utils"
 	"encoding/json"
 	"fmt"
+	"github.com/wxmsummer/airConditioner/server/message"
+	"github.com/wxmsummer/airConditioner/server/model"
+	"github.com/wxmsummer/airConditioner/server/utils"
 	"net"
 )
 
