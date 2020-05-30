@@ -2,7 +2,7 @@
 c/s模型，tcp通讯，使用json传输数据，数据库采用mysql
 
 ### 启动方式
-1. cd server/main
+1. cd server
 2. go run main.go
 3. 或者go build 得到可执行文件之后再运行
 
