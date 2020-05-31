@@ -3,10 +3,10 @@ package processor
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/wxmsummer/AirConditioner/server/message"
+	"github.com/wxmsummer/AirConditioner/common/message"
+	"github.com/wxmsummer/AirConditioner/common/utils"
 	"github.com/wxmsummer/AirConditioner/server/model"
 	"github.com/wxmsummer/AirConditioner/server/repository"
-	"github.com/wxmsummer/AirConditioner/server/utils"
 	"net"
 )
 

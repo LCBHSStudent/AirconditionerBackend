@@ -5,17 +5,17 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/spf13/viper"
+	"github.com/wxmsummer/AirConditioner/server/model"
 	"log"
 )
 
 func InitDB() (*gorm.DB, error) {
-	viper.SetConfigName("dbConfig") //  设置配置文件名 (不带后缀)
-	viper.AddConfigPath("./database")        // 比如添加当前目录
-	err := viper.ReadInConfig()     // 搜索路径，并读取配置数据
+	viper.SetConfigName("dbConfig")   //  设置配置文件名 (不带后缀)
+	viper.AddConfigPath("./database") // 比如添加当前目录
+	err := viper.ReadInConfig()       // 搜索路径，并读取配置数据
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
-
 
 	conf := map[string]interface{}{
 		"host":     viper.Get("mysql.host"),
@@ -27,11 +27,11 @@ func InitDB() (*gorm.DB, error) {
 
 	//db
 	db, err := CreateConnection(conf)
-
 	if err != nil {
 		log.Fatalf("connection error : %v \n", err)
 		return nil, err
 	}
+	db.Table("air_conditioners").CreateTable(&model.AirConditioner{})
 
 	return db, err
 }

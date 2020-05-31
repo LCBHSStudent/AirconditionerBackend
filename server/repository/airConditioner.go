@@ -20,7 +20,7 @@ type AirConditionerOrm struct {
 }
 
 func (orm *AirConditionerOrm) FindByID(id int) (airConditioner model.AirConditioner, err error) {
-	err = orm.Db.Where("id = ?", id).First(airConditioner).Error
+	err = orm.Db.Where("id = ?", id).First(&airConditioner).Error
 	if err != nil {
 		return
 	}
@@ -28,7 +28,8 @@ func (orm *AirConditionerOrm) FindByID(id int) (airConditioner model.AirConditio
 }
 
 func (orm *AirConditionerOrm) Create(airConditioner *model.AirConditioner) error {
-	err := orm.Db.Create(airConditioner).Error
+	dbResult := orm.Db.Create(airConditioner)
+	err := dbResult.Error
 	if err != nil {
 		return err
 	}

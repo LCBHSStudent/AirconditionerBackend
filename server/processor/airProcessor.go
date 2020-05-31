@@ -3,9 +3,9 @@ package processor
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/wxmsummer/AirConditioner/server/message"
+	"github.com/wxmsummer/AirConditioner/common/message"
+	"github.com/wxmsummer/AirConditioner/common/utils"
 	"github.com/wxmsummer/AirConditioner/server/repository"
-	"github.com/wxmsummer/AirConditioner/server/utils"
 	"net"
 )
 
@@ -149,14 +149,21 @@ func (ap *AirProcessor) Create(msg *message.Message) (err error) {
 	var airConditionerCreateRes message.AirConditionerCreateRes
 
 	airConditioner := airConditionerCreate.AirConditioner
-	err = ap.Orm.Create(&airConditioner)
-	if err != nil {
-		fmt.Println("ap.Orm.Create(&airConditioner) err=", err)
-		return
-	}
 
-	airConditionerCreateRes.Code = 200
-	airConditionerCreateRes.Msg = "创建成功！"
+	existAir, _ := ap.Orm.FindByID(airConditioner.Id)
+	// 如果已存在，则返回重新创建提示
+	if existAir.Id != 0 {
+		airConditionerCreateRes.Code = 501
+		airConditionerCreateRes.Msg = "空调Id已存在，请重新创建！"
+	} else {
+		err = ap.Orm.Create(&airConditioner)
+		if err != nil {
+			fmt.Println("ap.Orm.Create(&airConditioner) err=", err)
+			return
+		}
+		airConditionerCreateRes.Code = 200
+		airConditionerCreateRes.Msg = "创建成功！"
+	}
 
 	data, err := json.Marshal(airConditionerCreateRes)
 	if err != nil {

@@ -8,9 +8,18 @@ c/s模型，tcp通讯，使用json传输数据，数据库采用mysql
 * 使用viper进行配置管理
 
 ### 启动方式
-1. cd server
-2. go run main.go
-3. 或者go build 得到可执行文件之后再运行
+1. 配置go环境
+    * set GO111MODULE=on -- 设置go mod管理依赖
+    * set GOPROXY="https://goproxy.cn" -- 设置GOPROXY
+
+2. 启动服务端
+    * cd server
+    * go run main.go
+    * 或者go build 得到可执行文件之后再运行
+    
+3. 运行客户端进行测试
+    * cd client
+    * go run main.go
 
 ## 服务端实现：
 

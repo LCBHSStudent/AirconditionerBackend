@@ -2,20 +2,23 @@ package main
 
 import (
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"github.com/wxmsummer/AirConditioner/server/database"
 	"github.com/wxmsummer/AirConditioner/server/processor"
+	"io"
 	"log"
 	"net"
 )
 
 // 主控程序，处理和客户端的通讯
-func mainProcess(conn net.Conn) {
+func mainProcess(conn net.Conn, db *gorm.DB) {
 	defer conn.Close()
-	mainProcessor := &processor.MainProcessor{Conn: conn}
+	mainProcessor := &processor.MainProcessor{Conn: conn, Db: db}
 	err := mainProcessor.Process()
-	if err != nil {
-		fmt.Println("通讯协程错误，err=", err)
-		return
+	if err == io.EOF {
+		fmt.Println("io.EOF, 客户端退出")
+	} else {
+		fmt.Println("mainProcessor.Process() err=", err)
 	}
 }
 
@@ -41,6 +44,6 @@ func main() {
 			fmt.Println("listen.Accept err=", err)
 		}
 		fmt.Println("和客户端连接成功...")
-		go mainProcess(conn)
+		go mainProcess(conn, db)
 	}
 }
