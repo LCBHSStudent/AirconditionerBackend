@@ -10,22 +10,23 @@ import (
 
 func InitDB() (*gorm.DB, error) {
 	viper.SetConfigName("dbConfig") //  设置配置文件名 (不带后缀)
-	viper.AddConfigPath(".")        // 比如添加当前目录
+	viper.AddConfigPath("./database")        // 比如添加当前目录
 	err := viper.ReadInConfig()     // 搜索路径，并读取配置数据
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
 
+
 	conf := map[string]interface{}{
-		"host":     viper.Get("host"),
-		"port":     viper.Get("port"),
-		"user":     viper.Get("user"),
-		"database": viper.Get("database"),
-		"password": viper.Get("password"),
+		"host":     viper.Get("mysql.host"),
+		"port":     viper.Get("mysql.port"),
+		"user":     viper.Get("mysql.user"),
+		"database": viper.Get("mysql.database"),
+		"password": viper.Get("mysql.password"),
 	}
 
 	//db
-	db, err := CreateConnection(conf["mysql"].(map[string]interface{}))
+	db, err := CreateConnection(conf)
 
 	if err != nil {
 		log.Fatalf("connection error : %v \n", err)
