@@ -1,6 +1,6 @@
 package message
 
-import "github.com/wxmsummer/airConditioner/server/model"
+import "github.com/wxmsummer/AirConditioner/server/model"
 
 // 消息类型
 const (
@@ -8,15 +8,23 @@ const (
 	TypeUserRegisterRes = "UserRegisterRes"
 	TypeUserLogin       = "UserLogin"
 	TypeUserLoginRes    = "UserLoginRes"
-	TypeUserModify      = "UserModify"
-	TypeUserModifyRes   = "UserModifyRes"
-	TypeUserQuery       = "UserQuery"
-	TypeUserQueryRes    = "UserQueryRes"
+	TypeUserFindById    = "UserFindById"
+	TypeUserFindByIdRes = "UserFindByIdRes"
+	TypeUserFindAll     = "UserFindAll"
+	TypeUserFindAllRes  = "UserFindAllRes"
+	TypeUserUpdate      = "UserUpdate"
+	TypeUserUpdateRes   = "UserUpdate"
 
-	TypeAirModify    = "AirModify"
-	TypeAirModifyRes = "AirModifyRes"
-	TypeAirQuery     = "AirQuery"
-	TypeAirQueryRes  = "AirQueryRes"
+	TypeAirConditionerFindById      = "AirConditionerFindById"
+	TypeAirConditionerFindByIdRes   = "AirConditionerFindByIdRes"
+	TypeAirConditionerFindByRoom    = "AirConditionerFindByRoom"
+	TypeAirConditionerFindByRoomRes = "AirConditionerFindByRoomRes"
+	TypeAirConditionerFindAll       = "AirConditionerFindAll"
+	TypeAirConditionerFindAllRes    = "AirConditionerFindAllRes"
+	TypeAirConditionerCreate        = "AirConditionerCreate"
+	TypeAirConditionerCreateRes     = "AirConditionerCreateRes"
+	TypeAirConditionerUpdate        = "AirConditionerUpdate"
+	TypeAirConditionerUpdateRes     = "AirConditionerUpdateRes"
 
 	TypeRoomStateAdd       = "RoomStateAdd"
 	TypeRoomStateAddRes    = "RoomStateAddRes"
@@ -24,6 +32,13 @@ const (
 	TypeRoomStateQueryRes  = "RoomStateQueryRes"
 	TypeRoomStateDelete    = "RoomStateDelete"
 	TypeRoomStateDeleteRes = "RoomStateDeleteRes"
+
+	TypeFeeAdd       = "FeeAdd"
+	TypeFeeAddRes    = "FeeAddRes"
+	TypeFeeQuery     = "FeeQuery"
+	TypeFeeQueryRes  = "FeeQueryRes"
+	TypeFeeDelete    = "FeeDelete"
+	TypeFeeDeleteRes = "FeeDeleteRes"
 )
 
 // 定义消息结构体
@@ -35,110 +50,172 @@ type Message struct {
 
 // 用户注册消息结构体
 type UserRegister struct {
-	RoomNum   int    `json:"room_num"`
-	Privilege int    `json:"privilege"`
-	Password  string `json:"password"`
+	RoomNum  int    `json:"room_num"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
 }
 
 // 用户注册返回的消息
 type UserRegisterRes struct {
-	Code  int    `json:"code"`  // 状态码 400 表示用户已被注册，200表示注册成功
-	Error string `json:"error"` // 返回错误信息
+	Code int    `json:"code"`  // 状态码 400 表示用户已被注册，200表示注册成功
+	Msg  string `json:"error"` // 返回错误信息
 }
 
 // 用户登录消息结构体
 type UserLogin struct {
-	RoomNum  int    `json:"room_num"`
+	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
 
 // 用户登录返回的消息
 type UserLoginRes struct {
-	Code  int    `json:"code"`  // 状态码
-	Error string `json:"error"` // 返回错误信息
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
 }
 
-// 修改用户状态 结构体
-type UserModify struct {
-	model.User `json:"user"`
+type UserFindById struct {
+	Id int `json:"id"`
 }
 
-// 修改用户状态返回的消息结构体
-type UserModifyRes struct {
-	Code          int               `json:"code"`  // 状态码
-	Error         string            `json:"error"` // 返回错误信息
-	RoomStateList []model.RoomState `json:"room_state_list"`
+type UserFindByIdRes struct {
+	Code int        `json:"code"`  // 状态码
+	Msg  string     `json:"error"` // 返回错误信息
+	User model.User `json:"user"`
 }
 
-// 查询用户状态 结构体
-type UserQuery struct {
-	RoomNumber int `json:"room_number"` // 传入房间号进行查询，，如果传入0000号，则查询所有房间
+type UserFindAll struct {
 }
 
-// 查询用户状态返回的消息结构体
-type UserQueryRes struct {
-	Code     int          `json:"code"`      // 状态码
-	Error    string       `json:"error"`     // 返回错误信息
-	UserList []model.User `json:"user_list"` // 返回一个用户列表
+type UserFindAllRes struct {
+	Code  int          `json:"code"`  // 状态码
+	Msg   string       `json:"error"` // 返回错误信息
+	Users []model.User `json:"users"`
 }
 
-// 修改空调状态
-type AirModify struct {
-	model.AirConditioner `json:"air_conditioner"`
+type UserUpdate struct {
+	User model.User `json:"user"`
 }
 
-// 修改空调状态返回的消息
-type AirModifyRes struct {
-	Code  int    `json:"code"`  // 状态码
-	Error string `json:"error"` // 返回错误信息
+type UserUpdateRes struct {
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
 }
 
-// 查询空调状态
-type AirQuery struct {
-	RoomNumber int `json:"room_number"` // 传入房间号进行查询，，如果传入0号，则查询所有房间
+//
+//
+//
+type AirConditionerFindById struct {
+	Id int `json:"id"`
 }
 
-// 查询空调状态返回的消息结构体
-type AirQueryRes struct {
-	Code    int                    `json:"code"`     // 状态码
-	Error   string                 `json:"error"`    // 返回错误信息
-	AirList []model.AirConditioner `json:"air_list"` // 返回一个空调列表
+type AirConditionerFindByIdRes struct {
+	Code           int                  `json:"code"`            // 状态码
+	Msg            string               `json:"error"`           // 返回错误信息
+	AirConditioner model.AirConditioner `json:"air_conditioner"` // 返回一个空调状态数据
 }
 
-// 添加房间状态信息
+type AirConditionerFindByRoom struct {
+	RoomNum int `json:"room_num"`
+}
+
+type AirConditionerFindByRoomRes struct {
+	Code            int                    `json:"code"`             // 状态码
+	Msg             string                 `json:"error"`            // 返回错误信息
+	AirConditioners []model.AirConditioner `json:"air_conditioners"` // 返回一组空调状态数据
+}
+
+type AirConditionerFindAll struct{}
+
+type AirConditionerFindAllRes struct {
+	Code            int                    `json:"code"`             // 状态码
+	Msg             string                 `json:"error"`            // 返回错误信息
+	AirConditioners []model.AirConditioner `json:"air_conditioners"` // 返回一组空调状态数据
+}
+
+type AirConditionerCreate struct {
+	AirConditioner model.AirConditioner `json:"air_conditioner"`
+}
+
+type AirConditionerCreateRes struct {
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
+}
+
+type AirConditionerUpdate struct {
+	AirConditioner model.AirConditioner `json:"air_conditioner"`
+}
+
+type AirConditionerUpdateRes struct {
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
+}
+
+//
+//
+//
 type RoomStateAdd struct {
 	model.RoomState `json:"room_state"`
 }
 
-// 添加房间状态 返回消息
 type RoomStateAddRes struct {
-	Code  int    `json:"code"`  // 状态码
-	Error string `json:"error"` // 返回错误信息
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
 }
 
-// 查询房间状态:温度、耗电量、费用
 type RoomStateQuery struct {
 	RoomNum   int   `json:"room_num"`
 	StartTime int64 `json:"start_time"`
 	EndTime   int64 `json:"end_time"`
 }
 
-// 查询房间状态返回的消息结构体
 type RoomStateQueryRes struct {
-	Code          int               `json:"code"`  // 状态码
-	Error         string            `json:"error"` // 返回错误信息
-	RoomStateList []model.RoomState `json:"room_state_list"`
+	Code       int               `json:"code"`  // 状态码
+	Msg        string            `json:"error"` // 返回错误信息
+	RoomStates []model.RoomState `json:"room_states"`
 }
 
-// 删除房间状态
 type RoomStateDelete struct {
 	RoomNum   int   `json:"room_num"`
 	StartTime int64 `json:"start_time"`
 	EndTime   int64 `json:"end_time"`
 }
 
-// 删除房间状态返回的消息结构体
 type RoomStateDeleteRes struct {
-	Code  int    `json:"code"`  // 状态码
-	Error string `json:"error"` // 返回错误信息
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
+}
+
+//
+//
+//
+type FeeAdd struct {
+	model.Fee `json:"fee"`
+}
+
+type FeeAddRes struct {
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
+}
+
+type FeeQuery struct {
+	RoomNum   int   `json:"room_num"`
+	StartTime int64 `json:"start_time"`
+	EndTime   int64 `json:"end_time"`
+}
+
+type FeeQueryRes struct {
+	Code int         `json:"code"`  // 状态码
+	Msg  string      `json:"error"` // 返回错误信息
+	Fees []model.Fee `json:"fees"`
+}
+
+type FeeDelete struct {
+	RoomNum   int   `json:"room_num"`
+	StartTime int64 `json:"start_time"`
+	EndTime   int64 `json:"end_time"`
+}
+
+type FeeDeleteRes struct {
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
 }

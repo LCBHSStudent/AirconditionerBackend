@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/wxmsummer/airConditioner/server/message"
+	"github.com/wxmsummer/AirConditioner/server/message"
 	"net"
 )
 

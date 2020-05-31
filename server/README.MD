@@ -1,6 +1,12 @@
 # 分布式温控计费系统
 c/s模型，tcp通讯，使用json传输数据，数据库采用mysql
 
+### 架构设计
+* 通讯方式采取tcp通讯
+* 数据传输采取json传输
+* 使用gorm操作数据库
+* 使用viper进行配置管理
+
 ### 启动方式
 1. cd server
 2. go run main.go
@@ -10,20 +16,23 @@ c/s模型，tcp通讯，使用json传输数据，数据库采用mysql
 
 ### 一，数据结构/数据库表字段设计
 ```
-//1，用户结构
+// 用户结构
 type User struct {
-	RoomNum   int    `json:"room_num"`  // 房间号
-	Privilege int    `json:"privilege"` // 用户等级，0普通用户，1空调管理员，2酒店经理；不同等级的用户支持对数据库的不同操作
-	Password  string `json:"password"`  // 密码
-	CheckIn   int64  `json:"check_in"`  //入住时间
-	CheckOut  int64  `json:"check_out"` //退房时间
+	Id       int    `json:"id"`
+	RoomNum  int    `json:"room_num"`
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	CheckIn  int64  `json:"check_in"`  //入住时间
+	CheckOut int64  `json:"check_out"` //退房时间
 }
 ```
 
 ```
-// 2，空调状态结构
+// 空调数据结构
 type AirConditioner struct {
-	Number      int     `json:"number"`      // 空调编号，默认和房间编号相同
+	Id          int     `json:"id"`          // 空调编号
+	RoomNum     int     `json:"room_num"`    // 空调所在房间号，一个房间可能有多个空调
 	Power       int     `json:"power"`       // 电源开关：0关 1开
 	Mode        int     `json:"mode"`        // 模式
 	WindLevel   int     `json:"wind_level"`  // 风速
@@ -32,14 +41,23 @@ type AirConditioner struct {
 ```
 
 ```
-// 3，房间状态结构体，记录房间号、开始时间、结束时间，以及这段时间内的温度和费用、耗电量
+// 房间状态结构体，记录房间号、开始时间、结束时间，以及这段时间内的温度和耗电量
 type RoomState struct {
 	RoomNum     int     `json:"room_num"`    // 房间号
 	StartTime   int64   `json:"start_time"`  // 开始时间
 	EndTime     int64   `json:"end_time"`    // 结束时间
 	Power       float64 `json:"power"`       // 耗电量
-	Cost        float64 `json:"cost"`        // 费用
 	Temperature float64 `json:"temperature"` // 温度
+}
+```
+
+```
+// 费用结构体，记录房间号、开始时间、结束时间，以及这段时间内的费用
+type Fee struct {
+	RoomNum     int     `json:"room_num"`    // 房间号
+	StartTime   int64   `json:"start_time"`  // 开始时间
+	EndTime     int64   `json:"end_time"`    // 结束时间
+	Cost        float64 `json:"cost"`        // 费用
 }
 ```
 
@@ -47,46 +65,44 @@ type RoomState struct {
 
 1. 用户方法
 ```
-// 添加用户，需要传入一个user指针，返回数据库实际操作的行数和一个错误信息
-func AddUser(user *User) (int64, error) {}
-
-// 通过房间号查询用户，需要传入一个房间号，返回一个user实例
-func QueryUserWithRoomNum(roomNum int) User {}
-
-// 更新用户的入住时间，需要传入房间号和用户入住时间
-func UpdateUserCheckIn(roomNum int, checkIn int64) (int64, error) {}
-
-// 更新用户的退房时间，需要传入房间号和退房时间
-func UpdateUserCheckOut(roomNum int, checkOut int64) (int64, error) {}
-
-// 查询所有用户，该方法返回一个user列表
-func QueryAllUsers() (users []User,err error) {}
-
+// 用户数据库操作相关接口
+type UserRepository interface {
+	FindById(int) (*model.User, error)                        // 根据Id查找用户
+	Create(*model.User) error                                 // 创建用户
+	Update(*model.User) (*model.User, error)                  // 更新用户
+	FindByField(string, string, string) ([]model.User, error) // 条件查询
+	FindAllUsers() (users []model.User, err error)            // 查询所有用户
+}
 ```
 2.空调支持的方法
 ```
-// 往数据库中增加一条空调记录
-func AddAirConditioner(air *AirConditioner) (int64, error) {}
-
-// 通过空调编号查询空调状态
-func QueryAirWithNumber(number int) (air AirConditioner) {}
-
-// 修改空调状态数据
-func UpdateAirConditioner(air *AirConditioner) (int64, error) {}
-
-// 查询所有空调
-func QueryAllAirConditioners() (airs []AirConditioner, err error) {}
+// 空调数据库操作相关接口
+type AirConditionerRepository interface {
+	FindByID(int) (*model.AirConditioner, error)                       // 根据id查找空调
+	Create(*model.AirConditioner) error                                // 创建空调状态
+	Update(*model.AirConditioner) error                                // 更新空调状态
+	FindByField(string, string, string) (*model.AirConditioner, error) // 条件查询
+	FindAll() ([]model.AirConditioner, error)                          // 查询所有空调
+	FindByRoom(int) ([]model.AirConditioner, error)                    // 通过房间号查询
+}
 ```
 3.房间状态支持的方法
 ```
-// 添加一条房间的温度、耗电量、费用记录
-func AddRoomState(roomState *RoomState) (int64, error) {}
-
-// 查询指定时间段内的温度、耗电量、费用记录
-func QueryRoomStates(roomNum int, startTime, endTime int64) (roomStates []RoomState, err error) {}
-
-// 删除某个房间指定时间段内的温度、耗电量、费用记录（删除太老的数据）
-func DelRoomStatesByRoomNum(roomNum int, startTime, endTime int64) (int64, error) {}
+// 房间状态数据库操作相关接口
+type RoomStateRepository interface {
+	AddRoomState(roomState *model.RoomState) error                                    // 添加一条房间状态信息
+	QueryRoomStates(roomNum int, startTime, endTime int64) ([]model.RoomState, error) // 查询指定时间段内的房间状态，返回房间状态数组
+	DelRoomStates(roomNum int, startTime, endTime int64) (int64, error)               // 删除某个房间指定时间段内的状态记录（删除太老的数据），返回删除条数
+}
+```
+4.账单
+```
+// 账单数据库操作相关接口
+type FeeRepository interface {
+	AddFee(roomState *model.Fee) error                                    // 添加一条账单信息
+	QueryFees(roomNum int, startTime, endTime int64) ([]model.Fee, error) // 查询指定时间段内的账单，返回账单数组
+	DelFees(roomNum int, startTime, endTime int64) (int64, error)         // 删除某个房间指定时间段内的账单记录（删除太老的数据），返回删除条数
+}
 ```
 
 ### 二，通讯消息结构和消息类型设计
@@ -95,38 +111,51 @@ func DelRoomStatesByRoomNum(roomNum int, startTime, endTime int64) (int64, error
 ```
 // 定义消息结构体
 type Message struct {
-	Length int `json:"length"` // 消息长度，用于验证包是否缺失
-	Type string `json:"type"` // 消息类型
-	Data string `json:"data"` // 具体的消息数据
+	Length int    `json:"length"` // 消息长度，用于验证包是否缺失
+	Type   string `json:"type"`   // 消息类型
+	Data   string `json:"data"`   // 消息
 }
 ```
 
 2，具体的消息类型，每一个客户端发送的消息类型都对应一个服务端返回的消息类型
 ```
+// 消息类型
 const (
-    // 用户类型
 	TypeUserRegister    = "UserRegister"
 	TypeUserRegisterRes = "UserRegisterRes"
 	TypeUserLogin       = "UserLogin"
 	TypeUserLoginRes    = "UserLoginRes"
-	TypeUserModify      = "UserModify"
-	TypeUserModifyRes   = "UserModifyRes"
-	TypeUserQuery       = "UserQuery"
-	TypeUserQueryRes    = "UserQueryRes"
-    
-    // 空调类型
-	TypeAirModify    = "AirModify"
-	TypeAirModifyRes = "AirModifyRes"
-	TypeAirQuery     = "AirQuery"
-	TypeAirQueryRes  = "AirQueryRes"
-    
-    // 房间状态类型
+	TypeUserFindById    = "UserFindById"
+	TypeUserFindByIdRes = "UserFindByIdRes"
+	TypeUserFindAll     = "UserFindAll"
+	TypeUserFindAllRes  = "UserFindAllRes"
+	TypeUserUpdate      = "UserUpdate"
+	TypeUserUpdateRes   = "UserUpdate"
+
+	TypeAirConditionerFindById      = "AirConditionerFindById"
+	TypeAirConditionerFindByIdRes   = "AirConditionerFindByIdRes"
+	TypeAirConditionerFindByRoom    = "AirConditionerFindByRoom"
+	TypeAirConditionerFindByRoomRes = "AirConditionerFindByRoomRes"
+	TypeAirConditionerFindAll       = "AirConditionerFindAll"
+	TypeAirConditionerFindAllRes    = "AirConditionerFindAllRes"
+	TypeAirConditionerCreate        = "AirConditionerCreate"
+	TypeAirConditionerCreateRes     = "AirConditionerCreateRes"
+	TypeAirConditionerUpdate        = "AirConditionerUpdate"
+	TypeAirConditionerUpdateRes     = "AirConditionerUpdateRes"
+
 	TypeRoomStateAdd       = "RoomStateAdd"
 	TypeRoomStateAddRes    = "RoomStateAddRes"
 	TypeRoomStateQuery     = "RoomStateQuery"
 	TypeRoomStateQueryRes  = "RoomStateQueryRes"
 	TypeRoomStateDelete    = "RoomStateDelete"
 	TypeRoomStateDeleteRes = "RoomStateDeleteRes"
+
+	TypeFeeAdd       = "FeeAdd"
+	TypeFeeAddRes    = "FeeAddRes"
+	TypeFeeQuery     = "FeeQuery"
+	TypeFeeQueryRes  = "FeeQueryRes"
+	TypeFeeDelete    = "FeeDelete"
+	TypeFeeDeleteRes = "FeeDeleteRes"
 )
 ```
 
@@ -134,26 +163,27 @@ const (
 ```
 // 用户注册消息结构体
 type UserRegister struct {
-	RoomNum   int    `json:"room_num"`
-	Privilege int    `json:"privilege"`
-	Password  string `json:"password"`
+	RoomNum  int    `json:"room_num"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
 }
 
 // 用户注册返回的消息
 type UserRegisterRes struct {
-	Code  int    `json:"code"`  // 状态码 400 表示用户已被注册，200表示注册成功
-	Error string `json:"error"` // 返回错误信息
+	Code int    `json:"code"`  // 状态码 400 表示用户已被注册，200表示注册成功
+	Msg  string `json:"error"` // 返回错误信息
 }
 
-// 修改空调状态
-type AirModify struct {
-	model.AirConditioner `json:"air_conditioner"`
+// 用户登录消息结构体
+type UserLogin struct {
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
 }
 
-// 修改空调状态返回的消息
-type AirModifyRes struct {
-	Code  int    `json:"code"`  // 状态码
-	Error string `json:"error"` // 返回错误信息
+// 用户登录返回的消息
+type UserLoginRes struct {
+	Code int    `json:"code"`  // 状态码
+	Msg  string `json:"error"` // 返回错误信息
 }
 。。。
 以下还有很多，就不一一列出了，具体的消息结构是和消息类型一一对应的
@@ -163,12 +193,22 @@ type AirModifyRes struct {
 
 1，主函数，初始化连接池、等待与客户端连接，每当侦听到客户端的连接请求，就启动一个协程，维持和客户端的连接
 ```
+// 主函数，初始化连接池、与客户端连接、启动协程
 func main() {
-    // 初始化数据库
-	db.InitMysql(dbName, dsn, maxOpen, maxIdle, maxLifeTime)
-    // 在8888端口
-	listen,err := net.Listen("tcp", "0.0.0.0:8888")
-    // 循环侦听客户端的连接请求，一旦侦听到，就创建一个协程，和客户端保持连接
+
+	db, err := database.InitDB()
+	if err != nil {
+		log.Fatalf("connection error : %v \n", err)
+	}
+	defer db.Close()
+
+	fmt.Println("服务器在8888端口监听...")
+	listen, err := net.Listen("tcp", "0.0.0.0:8888")
+	if err != nil {
+		fmt.Println("net.listen err=", err)
+		return
+	}
+	defer listen.Close()
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
@@ -181,8 +221,13 @@ func main() {
 
 // 主控程序，处理和客户端的通讯
 func mainProcess(conn net.Conn) {
-	processor := &Processor.MainProcessor{Conn: conn}
-	err := processor.Process()
+	defer conn.Close()
+	mainProcessor := &processor.MainProcessor{Conn: conn}
+	err := mainProcessor.Process()
+	if err != nil {
+		fmt.Println("通讯协程错误，err=", err)
+		return
+	}
 }
 ```
 
@@ -214,22 +259,23 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 ```
 // 1，用户处理器，处理和用户相关的消息
 type UserProcessor struct {
-	Conn    net.Conn
-	RoomNum int
+	Conn net.Conn
+	Orm  *repository.UserOrm
 }
-// 用户注册，传入一个msg指针，返回err信息
-func (this *UserProcessor) ProcessUserRegister(msg *message.Message) (err error) {}
+
+// 用户注册
+func (up *UserProcessor) Register(msg *message.Message) (err error) {}
 
 // 用户登录
-func (this *UserProcessor) ProcessUserLogin(msg *message.Message) (err error) {}
+func (up *UserProcessor) Login(msg *message.Message) (err error) {}
 
-// 修改用户的入住时间或者退房时间
-func (this *UserProcessor) ProcessUserModify(msg *message.Message) (err error) {}
+// 用户查询
+func (up *UserProcessor) FindById(msg *message.Message) (err error) 
 
-// 用户查询 如果传入的房间号为0，则查询所有用户信息，否则按房间号查询
-func (this *UserProcessor) ProcessUserQuery(msg *message.Message) (err error) {}
+// 查询所有用户
+func (up *UserProcessor) FindAll(msg *message.Message) (err error)
 
-// 2.空调处理器和房间状态处理器和用户处理器类似，这里就不列举了
+// 2.其余处理器类似，这里就不列举了
 ```
 
 ### 小工具
@@ -248,47 +294,3 @@ func (this *Transfer) ReadPkg() (msg message.Message, err error) {}
 func (this *Transfer) WritePkg(data []byte) (err error) {}
 ```
 
-2，sql中实现了数据库的初始化工作，以及初始的数据库表的创建工作和操作数据库、查询数据库的方法
-```
-// 初始化mysql、创建连接池
-func InitMysql(name, dsn string, maxOpen, maxIdle int, maxLifeTime time.Duration) {
-	db1, err := sql.Open(name, dsn)
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		db = db1
-		db.SetMaxOpenConns(maxOpen)
-		db.SetMaxIdleConns(maxIdle)
-		db.SetConnMaxLifetime(maxLifeTime)
-		CreateTableWithUser()
-		CreateTableWithAirConditioner()
-		CreateTableWithRoomStates()
-	}
-}
-
-// 操作数据库
-func ModifyDB(sql string, args ...interface{}) (int64, error) {
-	result, err := db.Exec(sql, args...)
-	count, err := result.RowsAffected()
-	return count, err
-}
-
-// 查询单行数据
-func QueryRowDB(sql string) *sql.Row {
-	return db.QueryRow(sql)
-}
-
-// 查询多行数据
-func QueryRowsDB(sql string) (*sql.Rows, error) {
-	return db.Query(sql)
-}
-
-// 创建用户表
-func CreateTableWithUser() {}
-
-// 创建空调状态表
-func CreateTableWithAirConditioner() {}
-
-// 创建房间状态表，存储温度、耗电量和费用
-func CreateTableWithRoomStates() {}
-```
