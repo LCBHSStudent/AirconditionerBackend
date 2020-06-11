@@ -15,6 +15,7 @@ type FeeProcessor struct {
 	Orm  *repository.FeeOrm
 }
 
+// 插入一条账单信息
 func (fp *FeeProcessor) Add(msg *message.Message) (err error) {
 	var feeAdd message.FeeAdd
 	err = json.Unmarshal([]byte(msg.Data), &feeAdd)
@@ -23,11 +24,9 @@ func (fp *FeeProcessor) Add(msg *message.Message) (err error) {
 		return
 	}
 	var resMsg message.Message
-	var feeAddRes message.RoomStateAddRes
+	var feeAddRes message.NormalRes
 	fee := &model.Fee{
 		RoomNum:   feeAdd.RoomNum,
-		StartTime: feeAdd.StartTime,
-		EndTime:   feeAdd.EndTime,
 		Cost:      feeAdd.Cost,
 	}
 	err = fp.Orm.AddFee(fee)
@@ -46,7 +45,7 @@ func (fp *FeeProcessor) Add(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeFeeAddRes
+	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {
@@ -59,7 +58,8 @@ func (fp *FeeProcessor) Add(msg *message.Message) (err error) {
 	return
 }
 
-func (fp *FeeProcessor) Query(msg *message.Message) (err error) {
+// QueryByRoom 根据房间号查询账单
+func (fp *FeeProcessor) QueryByRoom(msg *message.Message) (err error) {
 	var feeQuery message.FeeQuery
 	err = json.Unmarshal([]byte(msg.Data), &feeQuery)
 	if err != nil {
@@ -71,17 +71,17 @@ func (fp *FeeProcessor) Query(msg *message.Message) (err error) {
 	var feeQueryRes message.FeeQueryRes
 
 	roomNum := feeQuery.RoomNum
-	startTime := feeQuery.StartTime
-	endTime := feeQuery.EndTime
 
-	fees, err := fp.Orm.QueryFees(roomNum, startTime, endTime)
+	fee, err := fp.Orm.QueryFeeByRoomNum(roomNum)
 	if err != nil {
 		feeQueryRes.Code = 500
 		feeQueryRes.Msg = "fp.Orm.QueryFees err"
+		return
 	}
 
 	feeQueryRes.Code = 200
-	feeQueryRes.Fees = fees
+	feeQueryRes.Msg = "查询账单成功！"
+	feeQueryRes.Fee = fee
 
 	data, err := json.Marshal(feeQueryRes)
 	if err != nil {
@@ -111,13 +111,12 @@ func (fp *FeeProcessor) Delete(msg *message.Message) (err error) {
 	}
 
 	var resMsg message.Message
-	var feeDeleteRes message.FeeDeleteRes
+	var feeDeleteRes message.NormalRes
 
 	roomNum := feeDelete.RoomNum
-	startTime := feeDelete.StartTime
-	endTime := feeDelete.EndTime
 
-	_, err = fp.Orm.DelFees(roomNum, startTime, endTime)
+
+	_, err = fp.Orm.DelFees(roomNum)
 	if err != nil {
 		feeDeleteRes.Code = 500
 		feeDeleteRes.Msg = "fp.Orm.DelFees err"
@@ -132,7 +131,7 @@ func (fp *FeeProcessor) Delete(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeFeeDeleteRes
+	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {

@@ -1,7 +1,6 @@
 package utils
 
 import (
-
 	"encoding/binary"
 	"encoding/json"
 	"fmt"

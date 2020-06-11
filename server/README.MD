@@ -1,11 +1,4 @@
-# 分布式温控计费系统
-c/s模型，tcp通讯，使用json传输数据，数据库采用mysql
 
-### 架构设计
-* 通讯方式采取tcp通讯
-* 数据传输采取json传输
-* 使用gorm操作数据库
-* 使用viper进行配置管理
 
 ## 服务端实现：
 
@@ -26,77 +19,27 @@ type User struct {
 ```
 // 空调数据结构
 type AirConditioner struct {
-	Id          int     `json:"id"`          // 空调编号
-	RoomNum     int     `json:"room_num"`    // 空调所在房间号，一个房间可能有多个空调
-	Power       int     `json:"power"`       // 电源开关：0关 1开
-	Mode        int     `json:"mode"`        // 模式
-	WindLevel   int     `json:"wind_level"`  // 风速
-	Temperature float64 `json:"temperature"` // 温度
+	RoomNum         int     `json:"room_num"`         // 空调所在房间号，默认一个房间一个空调(中央空调形式)
+	Power           int     `json:"power"`            // 电源开关：0关 1开
+	Mode            int     `json:"mode"`             // 模式
+	WindLevel       int     `json:"wind_level"`       // 风速
+	Temperature     float64 `json:"temperature"`      // 温度
+	RoomTemperature float64 `json:"room_temperature"` // 室温
+	TotalPower      float64 `json:"total_power"`      // 该次入住的总耗电量
+	StartWind       []int64 `json:"start_wind"`       // 开始送风时间，时间戳格式
+	StopWind        []int64 `json:"stop_wind"`        // 停止送风时间
+	OpenTime        []int64 `json:"open_time"`        // 开机时间，数组
+	CloseTime       []int64 `json:"close_time"`       // 关机时间，数组
+	SetParamNum     int     `json:"set_param_num"`    // 调整次数，用于报表展示
 }
 ```
 
-```
-// 房间状态结构体，记录房间号、开始时间、结束时间，以及这段时间内的温度和耗电量
-type RoomState struct {
-	RoomNum     int     `json:"room_num"`    // 房间号
-	StartTime   int64   `json:"start_time"`  // 开始时间
-	EndTime     int64   `json:"end_time"`    // 结束时间
-	Power       float64 `json:"power"`       // 耗电量
-	Temperature float64 `json:"temperature"` // 温度
-}
-```
 
 ```
-// 费用结构体，记录房间号、开始时间、结束时间，以及这段时间内的费用
+// 费用结构体，记录房间号、费用
 type Fee struct {
 	RoomNum     int     `json:"room_num"`    // 房间号
-	StartTime   int64   `json:"start_time"`  // 开始时间
-	EndTime     int64   `json:"end_time"`    // 结束时间
 	Cost        float64 `json:"cost"`        // 费用
-}
-```
-
-### 二，支持的数据库操作方法
-
-1. 用户方法
-```
-// 用户数据库操作相关接口
-type UserRepository interface {
-	FindById(int) (*model.User, error)                        // 根据Id查找用户
-	Create(*model.User) error                                 // 创建用户
-	Update(*model.User) (*model.User, error)                  // 更新用户
-	FindByField(string, string, string) ([]model.User, error) // 条件查询
-	FindAllUsers() (users []model.User, err error)            // 查询所有用户
-}
-```
-2.空调支持的方法
-```
-// 空调数据库操作相关接口
-type AirConditionerRepository interface {
-	FindByID(int) (*model.AirConditioner, error)                       // 根据id查找空调
-	Create(*model.AirConditioner) error                                // 创建空调状态
-	Update(*model.AirConditioner) error                                // 更新空调状态
-	FindByField(string, string, string) (*model.AirConditioner, error) // 条件查询
-	FindAll() ([]model.AirConditioner, error)                          // 查询所有空调
-	FindByRoom(int) ([]model.AirConditioner, error)                    // 通过房间号查询
-}
-```
-3.房间状态支持的方法
-```
-// 房间状态数据库操作相关接口
-type RoomStateRepository interface {
-	AddRoomState(roomState *model.RoomState) error                                    // 添加一条房间状态信息
-	QueryRoomStates(roomNum int, startTime, endTime int64) ([]model.RoomState, error) // 查询指定时间段内的房间状态，返回房间状态数组
-	DelRoomStates(roomNum int, startTime, endTime int64) (int64, error)               // 删除某个房间指定时间段内的状态记录（删除太老的数据），返回删除条数
-}
-```
-4.账单
-```
-// 账单数据库操作相关接口
-type FeeRepository interface {
-	AddFee(roomState *model.Fee) error                                    // 添加一条账单信息
-	QueryFees(roomNum int, startTime, endTime int64) ([]model.Fee, error) // 查询指定时间段内的账单，返回账单数组
-	DelFees(roomNum int, startTime, endTime int64) (int64, error)         // 删除某个房间指定时间段内的账单记录（删除太老的数据），返回删除条数
 }
 ```
 
@@ -116,57 +59,49 @@ type Message struct {
 ```
 // 消息类型
 const (
+	TypeNormalRes = "NormalRes"
+
 	TypeUserRegister    = "UserRegister"
-	TypeUserRegisterRes = "UserRegisterRes"
 	TypeUserLogin       = "UserLogin"
-	TypeUserLoginRes    = "UserLoginRes"
 	TypeUserFindById    = "UserFindById"
 	TypeUserFindByIdRes = "UserFindByIdRes"
 	TypeUserFindAll     = "UserFindAll"
 	TypeUserFindAllRes  = "UserFindAllRes"
 	TypeUserUpdate      = "UserUpdate"
-	TypeUserUpdateRes   = "UserUpdate"
 
-	TypeAirConditionerFindById      = "AirConditionerFindById"
-	TypeAirConditionerFindByIdRes   = "AirConditionerFindByIdRes"
 	TypeAirConditionerFindByRoom    = "AirConditionerFindByRoom"
 	TypeAirConditionerFindByRoomRes = "AirConditionerFindByRoomRes"
 	TypeAirConditionerFindAll       = "AirConditionerFindAll"
 	TypeAirConditionerFindAllRes    = "AirConditionerFindAllRes"
 	TypeAirConditionerCreate        = "AirConditionerCreate"
-	TypeAirConditionerCreateRes     = "AirConditionerCreateRes"
 	TypeAirConditionerUpdate        = "AirConditionerUpdate"
-	TypeAirConditionerUpdateRes     = "AirConditionerUpdateRes"
-
-	TypeRoomStateAdd       = "RoomStateAdd"
-	TypeRoomStateAddRes    = "RoomStateAddRes"
-	TypeRoomStateQuery     = "RoomStateQuery"
-	TypeRoomStateQueryRes  = "RoomStateQueryRes"
-	TypeRoomStateDelete    = "RoomStateDelete"
-	TypeRoomStateDeleteRes = "RoomStateDeleteRes"
+	TypeAirConditionerOn            = "AirConditionerOn"
+	TypeAirConditionerOff           = "AirConditionerOff"
+	TypeAirConditionerSetParam      = "AirConditionerSetParam"
+	TypeAirConditionerStopWind      = "AirConditionerStopWind"
+	TypeGetReport                   = "GetReport"
+	TypeGetReportRes                = "GetReportRes"
 
 	TypeFeeAdd       = "FeeAdd"
-	TypeFeeAddRes    = "FeeAddRes"
 	TypeFeeQuery     = "FeeQuery"
 	TypeFeeQueryRes  = "FeeQueryRes"
 	TypeFeeDelete    = "FeeDelete"
-	TypeFeeDeleteRes = "FeeDeleteRes"
 )
 ```
 
 3，具体的消息结构
 ```
+// 普通的消息返回格式，只包含状态码和msg，如需包含额外数据则另外定义返回格式
+type NormalRes struct {
+	Code int    `json:"code"` // 状态码
+	Msg  string `json:"msg"`  // 返回信息
+}
+
 // 用户注册消息结构体
 type UserRegister struct {
 	RoomNum  int    `json:"room_num"`
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
-}
-
-// 用户注册返回的消息
-type UserRegisterRes struct {
-	Code int    `json:"code"`  // 状态码 400 表示用户已被注册，200表示注册成功
-	Msg  string `json:"error"` // 返回错误信息
 }
 
 // 用户登录消息结构体
@@ -175,10 +110,8 @@ type UserLogin struct {
 	Password string `json:"password"`
 }
 
-// 用户登录返回的消息
-type UserLoginRes struct {
-	Code int    `json:"code"`  // 状态码
-	Msg  string `json:"error"` // 返回错误信息
+type UserFindById struct {
+	Id int `json:"id"`
 }
 。。。
 以下还有很多，就不一一列出了，具体的消息结构是和消息类型一一对应的

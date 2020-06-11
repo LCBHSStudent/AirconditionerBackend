@@ -26,7 +26,7 @@ func (up *UserProcessor) Register(msg *message.Message) (err error) {
 	}
 
 	var resMsg message.Message
-	var userRegisterRes message.UserRegisterRes
+	var userRegisterRes message.NormalRes
 
 	isExistUser, err := up.Orm.FindByPhone(userRegister.Phone)
 	if err != nil {
@@ -60,7 +60,7 @@ func (up *UserProcessor) Register(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeUserRegisterRes
+	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {
@@ -83,7 +83,7 @@ func (up *UserProcessor) Login(msg *message.Message) (err error) {
 	}
 
 	var resMsg message.Message
-	var userLoginRes message.UserLoginRes
+	var userLoginRes message.NormalRes
 
 	phone := userLogin.Phone
 	password := userLogin.Password
@@ -114,7 +114,7 @@ func (up *UserProcessor) Login(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeUserLoginRes
+	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {
@@ -169,13 +169,6 @@ func (up *UserProcessor) FindById(msg *message.Message) (err error) {
 }
 
 func (up *UserProcessor) FindAll(msg *message.Message) (err error) {
-	var userFindAll message.UserFindAll
-	err = json.Unmarshal([]byte(msg.Data), &userFindAll)
-	if err != nil {
-		fmt.Println("json.Unmarshal fail, err =", err)
-		return
-	}
-
 	var resMsg message.Message
 	var userFindAllRes message.UserFindAllRes
 
@@ -217,7 +210,7 @@ func (up *UserProcessor) Update(msg *message.Message) (err error) {
 	}
 
 	var resMsg message.Message
-	var userUpdateRes message.UserUpdateRes
+	var userUpdateRes message.NormalRes
 
 	user := userUpdate.User
 	err = up.Orm.Update(&user)
@@ -235,7 +228,7 @@ func (up *UserProcessor) Update(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeUserUpdateRes
+	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {

@@ -7,24 +7,15 @@ import (
 
 // 空调数据库操作相关接口
 type AirConditionerRepository interface {
-	FindByID(int) (*model.AirConditioner, error)                       // 根据id查找空调
 	Create(*model.AirConditioner) error                                // 创建空调状态
 	Update(*model.AirConditioner) error                                // 更新空调状态
 	FindByField(string, string, string) (*model.AirConditioner, error) // 条件查询
 	FindAll() ([]model.AirConditioner, error)                          // 查询所有空调
-	FindByRoom(int) ([]model.AirConditioner, error)                    // 通过房间号查询
+	FindByRoom(int) (model.AirConditioner, error)                      // 通过房间号查询
 }
 
 type AirConditionerOrm struct {
 	Db *gorm.DB
-}
-
-func (orm *AirConditionerOrm) FindByID(id int) (airConditioner model.AirConditioner, err error) {
-	err = orm.Db.Where("id = ?", id).First(&airConditioner).Error
-	if err != nil {
-		return
-	}
-	return
 }
 
 func (orm *AirConditionerOrm) Create(airConditioner *model.AirConditioner) error {
@@ -65,10 +56,11 @@ func (orm *AirConditionerOrm) FindAll() (airs []model.AirConditioner, err error)
 	return airs, nil
 }
 
-func (orm *AirConditionerOrm) FindByRoom(roomNum int) (airs []model.AirConditioner, err error) {
-	err = orm.Db.Where("room_num = ?", roomNum).Find(&airs).Error
+// 根据房间号查询空调状态
+func (orm *AirConditionerOrm) FindByRoom(roomNum int) (air model.AirConditioner, err error) {
+	err = orm.Db.Where("room_num = ?", roomNum).First(&air).Error
 	if err != nil {
-		return nil, err
+		return air, err
 	}
-	return airs, nil
+	return air, nil
 }
