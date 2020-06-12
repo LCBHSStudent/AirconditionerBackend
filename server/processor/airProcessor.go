@@ -133,7 +133,7 @@ func (ap *AirProcessor) Create(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeAirConditionerCreateRes
+	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {
@@ -204,10 +204,22 @@ func (ap *AirProcessor) PowerOn(msg *message.Message) (err error) {
 		return err
 	}
 	// 这里需要对 OpenTime 进行处理
-	if air.OpenTime == nil { // 如果是第一次开机，就初始化 OpenTime
-		air.OpenTime = []int64{powerOn.OpenTime}
+	if air.OpenTime == "" { // 如果是第一次开机，就初始化 OpenTime
+		openTimeList := []int64{powerOn.OpenTime}
+		res, err := json.Marshal(openTimeList)
+		if err != nil {
+			fmt.Println("json.Marshal(timeList) err =",err)
+		}
+		air.OpenTime = string(res)
 	} else { // 否则，就append OpenTime 列表
-		air.OpenTime = append(air.OpenTime, powerOn.OpenTime)
+		var timeList []int64
+		json.Unmarshal([]byte(air.OpenTime), &timeList)
+		timeList = append(timeList, powerOn.OpenTime)
+		res, err := json.Marshal(timeList)
+		if err != nil {
+			fmt.Println("json.Marshal(timeList) err =",err)
+		}
+		air.OpenTime = string(res)
 	}
 	air.Power = model.PowerOn
 	air.Mode = powerOn.Mode
@@ -260,10 +272,22 @@ func (ap *AirProcessor) PowerOff(msg *message.Message) (err error) {
 		return err
 	}
 	// 这里需要对 CloseTime 进行处理
-	if air.CloseTime == nil { // 如果是第一次关机，就初始化 CloseTime
-		air.CloseTime = []int64{powerOff.CloseTime}
-	} else { // 否则，就append CloseTime 列表
-		air.CloseTime = append(air.CloseTime, powerOff.CloseTime)
+	if air.CloseTime == "" { // 如果是第一次开机，就初始化 OpenTime
+		timeList := []int64{powerOff.CloseTime}
+		res, err := json.Marshal(timeList)
+		if err != nil {
+			fmt.Println("json.Marshal(timeList) err =",err)
+		}
+		air.CloseTime = string(res)
+	} else { // 否则，就append OpenTime 列表
+		var timeList []int64
+		json.Unmarshal([]byte(air.CloseTime), &timeList)
+		timeList = append(timeList, powerOff.CloseTime)
+		res, err := json.Marshal(timeList)
+		if err != nil {
+			fmt.Println("json.Marshal(timeList) err =",err)
+		}
+		air.CloseTime = string(res)
 	}
 	air.Power = model.PowerOff
 	err = ap.Orm.Update(air)
@@ -366,10 +390,22 @@ func (ap *AirProcessor) StopWind(msg *message.Message) (err error) {
 	}
 
 	// 这里需要对 stopWind 进行处理
-	if air.StopWind == nil { // 如果是第一次停止送风，就初始化 stopWind
-		air.StopWind = []int64{stopWind.StopWindTime}
-	} else { // 否则，就append StopWind 列表
-		air.StopWind = append(air.StopWind, stopWind.StopWindTime)
+	if air.StopWind == "" { // 如果是第一次开机，就初始化 OpenTime
+		timeList := []int64{stopWind.StopWindTime}
+		res, err := json.Marshal(timeList)
+		if err != nil {
+			fmt.Println("json.Marshal(timeList) err =",err)
+		}
+		air.StopWind = string(res)
+	} else { // 否则，就append OpenTime 列表
+		var timeList []int64
+		json.Unmarshal([]byte(air.StopWind), &timeList)
+		timeList = append(timeList, stopWind.StopWindTime)
+		res, err := json.Marshal(timeList)
+		if err != nil {
+			fmt.Println("json.Marshal(timeList) err =",err)
+		}
+		air.StopWind = string(res)
 	}
 
 	err = ap.Orm.Update(air)
@@ -412,15 +448,23 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 		return err
 	}
 
+	var (
+		openTimeList []int64
+		closeTimeList []int64
+	)
+
+
 	for _, air := range airs {
+		json.Unmarshal([]byte(air.OpenTime), &openTimeList)
+		json.Unmarshal([]byte(air.CloseTime), &closeTimeList)
 		var report model.Report
 		report.RoomNum = air.RoomNum
 		report.TotalPower = air.TotalPower
 		report.TotalFee = air.TotalPower * 1
-		report.CloseNum = len(air.CloseTime)
+		report.CloseNum = len(closeTimeList)
 		report.SetParamNum = air.SetParamNum
 
-		for i := 0; i < len(air.CloseTime); i++ {
+		for i := 0; i < len(closeTimeList); i++ {
 			// 计算空调的总开机时长：用关机数组的值逐个减去开机数组的值
 			report.UsedTime += int(air.CloseTime[i] - air.OpenTime[i])
 		}

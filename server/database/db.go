@@ -32,6 +32,7 @@ func InitDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	db.Table("air_conditioners").CreateTable(&model.AirConditioner{})
+	db.Table("fees").CreateTable(&model.Fee{})
 
 	return db, err
 }

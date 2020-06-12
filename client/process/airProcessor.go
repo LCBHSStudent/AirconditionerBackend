@@ -13,7 +13,7 @@ type AirProcessor struct {
 	Conn net.Conn
 }
 
-func (up *AirProcessor) Create(id, roomNum int) (err error) {
+func (up *AirProcessor) Create(roomNum int) (err error) {
 
 	// 1，连接服务器
 	conn, err := net.Dial("tcp", "0.0.0.0:8888")
@@ -30,7 +30,6 @@ func (up *AirProcessor) Create(id, roomNum int) (err error) {
 
 	// 2，创建一个smsMsg实例
 	var airCreateMsg message.AirConditionerCreate
-	airCreateMsg.AirConditioner.Id = id
 	airCreateMsg.AirConditioner.RoomNum = roomNum
 
 	// 4，将smsMsg序列化
@@ -67,7 +66,7 @@ func (up *AirProcessor) Create(id, roomNum int) (err error) {
 	}
 
 	// 反序列化Data
-	var airCreateResMsg message.AirConditionerCreateRes
+	var airCreateResMsg message.NormalRes
 	err = json.Unmarshal([]byte(msg.Data), &airCreateResMsg)
 	if err != nil {
 		fmt.Println("json.Unmarshal err=", err)

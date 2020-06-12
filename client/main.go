@@ -8,6 +8,7 @@ func main() {
 
 	// 测试AirProcessor.Create()
 	up := &process.AirProcessor{}
-	_ = up.Create(302, 1001)
+	_ = up.Create(1001)
+
 
 }
