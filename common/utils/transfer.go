@@ -18,6 +18,43 @@ type Transfer struct {
 // 将读取数据包，直接封装成一个函数readPkg(),返回message，err
 func (this *Transfer) ReadPkg() (msg message.Message, err error) {
 
+	buf := make([]byte, 1024*4)
+	conn := this.Conn
+
+	// 从conn中读取字节，放到buf中
+	n, err := conn.Read(buf)
+	if n == 0 || err != nil {
+		// err = errors.New("read pkg body error")
+		return
+	}
+
+	// 把buf反序列化为message.Message
+	// 注意这里的buf一定要是buf[:n]，不能为其他，否则报错：json.Unmarshal err= invalid character '\x00' after top-level value
+	err = json.Unmarshal(buf[:n], &msg)
+	if err != nil {
+		fmt.Println("json.Unmarshal err=", err)
+		return
+	}
+	return
+}
+
+func (this *Transfer) WritePkg(data []byte) (err error) {
+
+	// 先获取到data的长度，然后转成一个表示长度的byte切片
+	conn := this.Conn
+	// 发送data
+	n, err := conn.Write(data)
+	if n == 0 || err != nil {
+		fmt.Println("conn.Write(bytes) fail", err)
+		return
+	}
+	return
+}
+
+// 先读取data长度
+// 将读取数据包，直接封装成一个函数readPkg(),返回message，err
+func (this *Transfer) ReadPkg2() (msg message.Message, err error) {
+
 	// buf := make([]byte, 1024*4)
 	buf := this.Buf
 	conn := this.Conn
@@ -52,7 +89,8 @@ func (this *Transfer) ReadPkg() (msg message.Message, err error) {
 	return
 }
 
-func (this *Transfer) WritePkg(data []byte) (err error) {
+// 先发送data长度
+func (this *Transfer) WritePkg2(data []byte) (err error) {
 
 	// 先发送长度给对方
 	// 先获取到data的长度，然后转成一个表示长度的byte切片
@@ -60,6 +98,8 @@ func (this *Transfer) WritePkg(data []byte) (err error) {
 	conn := this.Conn
 	var pkgLen uint32
 	pkgLen = uint32(len(data))
+	fmt.Println("data:", data)
+	fmt.Println("pkgLen:", pkgLen)
 	binary.BigEndian.PutUint32(buf[0:4], pkgLen)
 
 	// 发送长度

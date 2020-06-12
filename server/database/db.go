@@ -6,6 +6,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/spf13/viper"
 	"github.com/wxmsummer/AirConditioner/server/model"
+	"github.com/wxmsummer/AirConditioner/server/repository"
 	"log"
 )
 
@@ -34,6 +35,9 @@ func InitDB() (*gorm.DB, error) {
 	db.Table("air_conditioners").CreateTable(&model.AirConditioner{})
 	db.Table("fees").CreateTable(&model.Fee{})
 
+	// 初始化一些空调数据
+	initData(db)
+
 	return db, err
 }
 
@@ -49,4 +53,15 @@ func CreateConnection(conf map[string]interface{}) (*gorm.DB, error) {
 		user, password, host, port, dbName,
 	),
 	)
+}
+
+// 初始化空调数据
+func initData(db *gorm.DB) {
+	air := model.AirConditioner{}
+	Orm := repository.AirConditionerOrm{Db: db}
+	for i := 1001; i < 1005; i++ {
+		air.RoomNum = i
+		Orm.Create(&air)
+	}
+	fmt.Println("空调数据库记录初始化成功！")
 }

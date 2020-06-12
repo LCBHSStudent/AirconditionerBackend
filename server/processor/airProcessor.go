@@ -201,6 +201,7 @@ func (ap *AirProcessor) PowerOn(msg *message.Message) (err error) {
 	// 先取出该空调状态数据
 	air, err := ap.Orm.FindByRoom(powerOn.RoomNum)
 	if err != nil {
+		fmt.Println("ap.Orm.FindByRoom(powerOn.RoomNum) err = ", err)
 		return err
 	}
 	// 这里需要对 OpenTime 进行处理
