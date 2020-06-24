@@ -188,17 +188,17 @@
 {
     "type":"AirConditionerOn",
     "data":{
-        "room_num": "101",          //房间号
-    	"mode": "1",                //模式（0制冷/1制热）
-   	 	"wind_level": "1",          //风速	
-    	"temperature": "25.5",      //目标温度
-    	"open_time": "1591873406"   //开机时间，时间戳格式
+        "room_num": 101,          //房间号
+    	"mode": 1,                //模式（0制冷/1制热）
+   	 	"wind_level": 1,          //风速	
+    	"temperature": 25.5,      //目标温度
+    	"open_time": 1591873406   //开机时间，时间戳格式
     }
 }
 
 //服务端返回
 {
-    "code":"200",     //200 ，500 
+    "code":200,     //200 ，500 
     "messege":"开机成功！"    //ok ， wait 
 }
 ```
@@ -210,15 +210,15 @@
 {
     "type":"AirConditionerSetParam",
     data:{
-        "RoomNum":"101", //房间号
-    	"mode":"1",
+        "room_num":101, //房间号
+    	"mode":1,
     	"wind_level":"",
-    	"temperature":"25.5"
+    	"temperature":25.5
     }
 }
 //服务端返回
 {
-    "code":"200",   //200 / 500 / 404
+    "code":200,   //200 / 500 / 404
     "messege":"调整空调参数成功！"  //ok / wait /
 }
 ```
@@ -230,13 +230,13 @@
 {
     "type":"AirConditionerOff",
     "data":{
-        "roomNum":"101", //房间号
-    	"close_time":"1591873406"
+        "room_num":101, //房间号
+    	"close_time":1591873406
     }
 }
 //服务端返回
 {
-    "code":"200",   
+    "code":200,   
     "messege":"关机成功！"  
 }
 ```
@@ -247,8 +247,10 @@
 //客户端发送
 {
 	"type":"",
-    "RoomNum":"101", //房间号
-    "totalpower":""  //总耗电量
+    "data":{
+        "room_num":101, //房间号
+    	"total_power":12.3 // 总耗电量
+    }
 }
 //服务端返回
 {
@@ -263,12 +265,14 @@
 //客户端发送
 {
     "type":"AirConditionerStopWind",
-    "room_num":"101", //房间号
-    "end_wind":"1591873406",   //停止送风时间戳
+    "data":{
+      "room_num":101, //房间号
+      "end_wind":1591873406,   //停止送风时间戳
+    }
 }
 //服务端返回
 {
-    "code":"200",  
+    "code":200,  
     "messege":"空调停止送风成功！"  
 }
 ```
@@ -286,11 +290,11 @@
 }
 //服务端返回
 {
-	"code":"200",   
+	"code":200,   
     "messege":"查询所有空调状态成功！" , 
     "data":[
     	{
-    		"room_num":"101",
+    		"room_num":101,
     		"power":"",    //正在送风/等待/关机
             "mode":"",     
             "wind_level":"",
@@ -300,7 +304,7 @@
             ...,
     	},
     	{
-    		"room_num":"102",
+    		"room_num":102,
     		"power":"",    //正在送风/等待/关机
             "mode":"",     
             "wind_level":"",
@@ -324,7 +328,7 @@
 }
 //服务端返回
 {
-    "code":"200",  
+    "code":200,  
     "messege":"获取所有空调报表成功！",
     "data":[
       {
@@ -348,8 +352,6 @@
 }
 ```
 
-
-
 4、前台
 
 ​    4.1 查看账单
@@ -358,16 +360,19 @@
 //客户端发送
 {
 	"type":"FeeQuery",
-	"room_num":"101"
+    "data":
+    {
+          "room_num":101,         //房间号
+    }
 }
 //服务端返回
 {
-    "code":"200",    
+    "code":200,    
     "messege":"查询账单成功！",  
     "data":
     {
-          "room_num":"101",         //房间号
-          "cost":"23.4",            //总费用  
+          "room_num":101,         //房间号
+          "cost":23.4,            //总费用  
     }     //fee 费用
 }
 ```
@@ -378,11 +383,14 @@
 //客户端发送
 {
 	"type":"",
-	"room_num":"101"
+    "data":
+    {
+        "room_num":101,         //房间号
+    }
 }
 //服务端返回
 {
-    "code":"200",  
+    "code":200,  
     "messege":"OK",  
     "data":{
         "fee":"",
