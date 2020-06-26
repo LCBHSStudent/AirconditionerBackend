@@ -32,8 +32,14 @@ func InitDB() (*gorm.DB, error) {
 		log.Fatalf("connection error : %v \n", err)
 		return nil, err
 	}
-	db.Table("air_conditioners").CreateTable(&model.AirConditioner{})
-	db.Table("fees").CreateTable(&model.Fee{})
+
+	
+	if !db.HasTable("air_conditioners") {
+		db.Table("air_conditioners").CreateTable(&model.AirConditioner{})
+	}
+	if !db.HasTable("fees") {
+		db.Table("fees").CreateTable(&model.Fee{})
+	}
 
 	// 初始化一些空调数据
 	initData(db)

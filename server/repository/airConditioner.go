@@ -28,7 +28,7 @@ func (orm *AirConditionerOrm) Create(airConditioner *model.AirConditioner) error
 }
 
 func (orm *AirConditionerOrm) Update(airConditioner model.AirConditioner) error {
-	err := orm.Db.Model(airConditioner).Update(&airConditioner).Error
+	err := orm.Db.Model(&airConditioner).Where("room_num = ?", airConditioner.RoomNum).Updates(airConditioner).Error
 	if err != nil {
 		return err
 	}

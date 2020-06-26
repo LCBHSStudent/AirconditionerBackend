@@ -9,7 +9,7 @@ func main() {
 
 	// 测试AirProcessor.Create()
 	up := &process.AirProcessor{}
-	_ = up.Create(1002)
+	// _ = up.Create(1002)
 
 	powerOn := message.AirConditionerOn{
 		RoomNum:     1001,
