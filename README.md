@@ -6,6 +6,7 @@ c/s模型，tcp通讯，使用json传输数据，数据库采用mysql
 * 使用json进行数据传输
 * 使用gorm操作数据库，包括数据表的创建、增删改查等
 * 使用go-viper进行配置管理
+* =.= 并没有分布式
 
 #### server端代码，详情查看server/README.MD
 #### 接口文档，详情查看InterfaceDoc.MD

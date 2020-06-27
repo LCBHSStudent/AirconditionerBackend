@@ -35,5 +35,7 @@ func main() {
 
 	// _ = up.SetParam(setParam)
 
-	_ = up.WatchAir()
+	// _ = up.WatchAir()
+
+	_ = up.GetReport()
 }

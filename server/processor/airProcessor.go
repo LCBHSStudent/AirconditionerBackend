@@ -539,13 +539,9 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 		return err
 	}
 
-	var (
-		openTimeList []int64
-		closeTimeList []int64
-	)
-
-
 	for _, air := range airs {
+		openTimeList := []int64{}
+		closeTimeList := []int64{}
 		json.Unmarshal([]byte(air.OpenTime), &openTimeList)
 		json.Unmarshal([]byte(air.CloseTime), &closeTimeList)
 		var report model.Report
@@ -570,7 +566,7 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 	data, err := json.Marshal(getReportRes)
 	if err != nil {
 		fmt.Println("json.Marshal fail, err=", err)
-		return
+		return 
 	}
 
 	resMsg.Type = message.TypeGetReportRes
@@ -578,12 +574,12 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 	data, err = json.Marshal(resMsg)
 	if err != nil {
 		fmt.Println("json.Marshal fail, err=", err)
-		return
+		return 
 	}
 
 	tf := &utils.Transfer{Conn: ap.Conn}
 	err = tf.WritePkg(data)
-	return
+	return 
 }
 
 // GetDetailList
