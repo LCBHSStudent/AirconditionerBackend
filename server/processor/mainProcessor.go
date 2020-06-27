@@ -90,6 +90,9 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	case message.TypeGetReport:
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
 		err = ap.GetReport(msg)
+	case message.TypeGetDetailList:
+		ap := &AirProcessor{Conn: conn, Orm: airOrm}
+		err = ap.GetDetailList(msg)
 	case message.TypeSetRoomData:
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
 		err = ap.SetRoomData(msg)
