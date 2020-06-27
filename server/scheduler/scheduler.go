@@ -95,6 +95,18 @@ func Schedule(){
 			RequestQueue = []ScheduleReq{}
 		}
 
+		// 处理等待队列和服务队列
+		for len(ServingQueue) < MaxServerNum {
+			// 如果等待队列为空，就跳出循环了
+			if len(WatingQueue) == 0 {
+				break
+			} else { // 否则就直接往服务队列里调度
+				nowReq := WatingQueue[0]
+				ServingQueue = append(ServingQueue, nowReq)
+				WatingQueue = WatingQueue[1:]
+			}
+		}
+
 		time.Sleep(time.Second * TimeSlice)
 	}
 }

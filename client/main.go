@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/wxmsummer/AirConditioner/client/process"
 	"github.com/wxmsummer/AirConditioner/common/message"
-	"time"
+	//"time"
 )
 
 func main() {
@@ -21,11 +21,11 @@ func main() {
 	// }
 	// _ = up.PowerOn(powerOn)
 
-	// powerOff := message.AirConditionerOff{
-	// 	RoomNum:     1005,
-	// 	CloseTime:    1591873628,
-	// }
-	// _ = up.PowerOff(powerOff)
+	powerOff := message.AirConditionerOff{
+		RoomNum:     1001,
+		CloseTime:    1591873628,
+	}
+	_ = up.PowerOff(powerOff)
 
 	// setParam := message.AirConditionerSetParam {
 	// 	RoomNum: 1001,
@@ -45,15 +45,13 @@ func main() {
 	// }
 	// _ = up.GetDetail(getDetail)
 
+	// stopWind := message.AirConditionerStopWind{
+	// 	RoomNum:1001,
+	// }
+	// _ = up.StopWind(stopWind)
 
+	// time.Sleep(time.Second*5)
 
-	stopWind := message.AirConditionerStopWind{
-		RoomNum:1001,
-	}
-	_ = up.StopWind(stopWind)
-
-	time.Sleep(time.Second*5)
-
-	sp := &process.ScheduleProcessor{}
-	_ = sp.GetServingQueue()
+	// sp := &process.ScheduleProcessor{}
+	// _ = sp.GetServingQueue()
 }
