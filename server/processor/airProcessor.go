@@ -479,6 +479,15 @@ func (ap *AirProcessor) StopWind(msg *message.Message) (err error) {
 		return
 	}
 
+	ScheduleReq := scheduler.ScheduleReq{
+		RoomNum: air.RoomNum,
+		Power: "on",
+		WindLevel: 0,
+		ArivingTime: time.Now().Unix(),
+	}
+
+	scheduler.AddScheduleReq(ScheduleReq)
+
 	normalRes.Code = 200
 	normalRes.Msg = "空调停止送风成功！"
 

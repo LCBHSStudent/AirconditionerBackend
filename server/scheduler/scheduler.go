@@ -48,6 +48,10 @@ func Schedule(){
 				break
 			} else { // 否则就直接往服务队列里调度
 				nowReq := RequestQueue[0]
+				if flag := checkWindStop(nowReq); flag{
+					RequestQueue = RequestQueue[1:]
+					continue
+				}
 				if flag := checkPowerOff(nowReq); flag{
 					RequestQueue = RequestQueue[1:]
 					continue
@@ -61,6 +65,10 @@ func Schedule(){
 		if len(RequestQueue) != 0 {
 			for i:=0; i < len(RequestQueue); i++ {
 				nowReq := RequestQueue[i]
+
+				if flag := checkWindStop(nowReq); flag{
+					continue
+				}
 
 				if flag := checkPowerOff(nowReq); flag{
 					continue
@@ -126,6 +134,28 @@ func checkPowerOff(nowReq ScheduleReq) (flag bool) {
 			if WatingQueue[i].RoomNum == nowReq.RoomNum {
 				WatingQueue = append(WatingQueue[:i], WatingQueue[i+1:]...)
 				fmt.Println("checkPowerOff... remove from WatingQueue")
+				flag = true
+			}
+		}
+	}
+	return flag
+}
+
+func checkWindStop(nowReq ScheduleReq) (flag bool) {
+	flag = false
+	if nowReq.WindLevel == 0 {
+		for i := 0; i < len(ServingQueue); i++ {
+			if ServingQueue[i].RoomNum == nowReq.RoomNum {
+				ServingQueue = append(ServingQueue[:i], ServingQueue[i+1:]...)
+				fmt.Println("checkWindStop... remove from ServingQueue")
+				flag = true
+			}
+		}
+
+		for i := 0; i < len(WatingQueue); i++ {
+			if WatingQueue[i].RoomNum == nowReq.RoomNum {
+				WatingQueue = append(WatingQueue[:i], WatingQueue[i+1:]...)
+				fmt.Println("checkWindStop... remove from WatingQueue")
 				flag = true
 			}
 		}

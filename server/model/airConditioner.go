@@ -25,6 +25,7 @@ const (
 )
 
 var LevelMap = map[string]int{
+	"stop":0,
 	"low":1,
 	"mid":2,
 	"high":3,
