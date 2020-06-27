@@ -177,12 +177,9 @@ type GetDetailList struct {
 	RoomNum      int   	 `json:"room_num"`
 }
 
-// 房间号、开始送风时间、结束送风时间、送风时长、风速、费率、费用。
+
 type GetDetailListRes struct {
-	RoomNum      	int   	 `json:"room_num"`
-	StartWindList	[]int64	 `json:"start_wind_list"`
-	StoptWindList	[]int64	 `json:"stop_wind_list"`
-	TotalWindTime   int64	 `json:"total_wind_time"`
-	WindLevel		string 	 `json:"wind_level"`
-	TotalFee		float64	 `json:"total_fee"`
+	Code    int            `json:"code"`    // 状态码
+	Msg     string         `json:"msg"`     // 返回信息
+	Detail  model.Detail	`json:"detail"` // 详单
 }

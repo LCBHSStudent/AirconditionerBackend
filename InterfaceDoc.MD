@@ -389,16 +389,21 @@
         "room_num":101,         //房间号
     }
 }
+
+
 //服务端返回
 {
     "code":200,  
-    "messege":"OK",  
+    "messege":"获取详单成功！",  
     "data":{
-        "fee":"",
-        "feerate":"",
+        "room_num":101,
+        "start_wind_list":"",
+        "stop_wind_list":"",
+        "total_wind_time":"",
+        "wind_level":"",
         "total_power":"",
-        "open_time":"",
-        "close_time":""
+        "fee_rate":"",
+        "total_fee":"",
     }
 }
 ```
