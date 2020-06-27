@@ -34,8 +34,8 @@ var windTimeMap = make(map[int]WindTime)
 
 func Schedule(){
 
-
 	for {
+		rrFlag := true
 
 		fmt.Println("RequestQueue:", RequestQueue)
 		fmt.Println("ServingQueue:", ServingQueue)
@@ -47,8 +47,6 @@ func Schedule(){
 			}
 			time.Sleep(time.Second * TimeGap)
 		}
-
-		roundRobin()
 
 		// 处理等待队列和服务队列
 		for len(ServingQueue) < MaxServerNum {
@@ -91,7 +89,8 @@ func Schedule(){
 						WatingQueue = append(WatingQueue, ServingQueue[j])
 						// 并且立即服务高风速请求
 						ServingQueue[j] = nowReq
-						// 跳出查找
+						// 跳出查找，同时接下来不进行RR调度
+						rrFlag = false
 						break
 					}
 					if j == len(ServingQueue)-1 {
@@ -114,6 +113,10 @@ func Schedule(){
 				ServingQueue = append(ServingQueue, nowReq)
 				WatingQueue = WatingQueue[1:]
 			}
+		}
+
+		if rrFlag{
+			roundRobin()
 		}
 
 	}
