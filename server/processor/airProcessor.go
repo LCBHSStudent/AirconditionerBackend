@@ -540,4 +540,64 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 	return
 }
 
+// GetDetailList
+func (ap *AirProcessor) GetDetailList(msg *message.Message) (err error) {
 
+	var getDetailList message.GetDetailList
+	err = json.Unmarshal([]byte(msg.Data), &getDetailList)
+	if err != nil {
+		fmt.Println("json.Unmarshal fail, err =", err)
+		return
+	}
+	
+	air, err := ap.Orm.FindByRoom(getDetailList.RoomNum)
+	if err != nil {
+		fmt.Println("Orm.FindByRoom err=", err)
+		return err
+	}
+
+	var resMsg message.Message
+	var getDetailListRes message.GetDetailListRes
+
+	var (
+		startWindList []int64
+		stopWindList []int64
+	)
+
+	json.Unmarshal([]byte(air.StartWind), &startWindList)
+	json.Unmarshal([]byte(air.StopWind), &stopWindList)
+	var detail model.Detail
+	detail.RoomNum = air.RoomNum
+	detail.StartWindList = startWindList
+	detail.StoptWindList = stopWindList
+	detail.WindLevel = air.WindLevel
+	detail.TotalPower = air.TotalPower
+	detail.FeeRate = model.DefaultFeeRate
+	detail.TotalFee = air.TotalPower * model.DefaultFeeRate
+
+	for i := 0; i < len(startWindList); i++ {
+		// 计算空调的总送风时长：用停止送风数组的值逐个开始送风数组的值
+		detail.TotalWindTime += int64(stopWindList[i] - startWindList[i])
+	}
+
+	getDetailListRes.Code = 200
+	getDetailListRes.Msg = "获取详单成功！"
+
+	data, err := json.Marshal(getDetailListRes)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	resMsg.Type = message.TypeGetDetailListRes
+	resMsg.Data = string(data)
+	data, err = json.Marshal(resMsg)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	tf := &utils.Transfer{Conn: ap.Conn}
+	err = tf.WritePkg(data)
+	return
+}
