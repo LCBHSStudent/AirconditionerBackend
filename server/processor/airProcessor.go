@@ -635,8 +635,8 @@ func (ap *AirProcessor) GetDetailList(msg *message.Message) (err error) {
 		stopWindList []int64
 	)
 
-	json.Unmarshal([]byte(air.StartWind), &startWindList)
-	json.Unmarshal([]byte(air.StopWind), &stopWindList)
+	json.Unmarshal([]byte(air.OpenTime), &startWindList)
+	json.Unmarshal([]byte(air.CloseTime), &stopWindList)
 	var detail model.Detail
 	detail.RoomNum = air.RoomNum
 	detail.StartWindList = startWindList
@@ -646,7 +646,14 @@ func (ap *AirProcessor) GetDetailList(msg *message.Message) (err error) {
 	detail.FeeRate = model.DefaultFeeRate
 	detail.TotalFee = air.TotalPower * model.DefaultFeeRate
 
-	for i := 0; i < len(startWindList); i++ {
+	var length int
+	if len(stopWindList) < len(startWindList){
+		length = len(stopWindList)
+	} else {
+		length = len(startWindList)
+	}
+
+	for i := 0; i < length; i++ {
 		// 计算空调的总送风时长：用停止送风数组的值逐个开始送风数组的值
 		detail.TotalWindTime += int64(stopWindList[i] - startWindList[i])
 	}

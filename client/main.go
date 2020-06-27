@@ -21,11 +21,11 @@ func main() {
 	// }
 	// _ = up.PowerOn(powerOn)
 
-	powerOff := message.AirConditionerOff{
-		RoomNum:     1001,
-		CloseTime:    1591873628,
-	}
-	_ = up.PowerOff(powerOff)
+	// powerOff := message.AirConditionerOff{
+	// 	RoomNum:     1001,
+	// 	CloseTime:    1591873628,
+	// }
+	// _ = up.PowerOff(powerOff)
 
 	// setParam := message.AirConditionerSetParam {
 	// 	RoomNum: 1001,
@@ -40,10 +40,10 @@ func main() {
 
 	// _ = up.GetReport()
 
-	// getDetail := message.GetDetailList{
-	// 	RoomNum: 1001,
-	// }
-	// _ = up.GetDetail(getDetail)
+	getDetail := message.GetDetailList{
+		RoomNum: 1005,
+	}
+	_ = up.GetDetail(getDetail)
 
 	// stopWind := message.AirConditionerStopWind{
 	// 	RoomNum:1001,
