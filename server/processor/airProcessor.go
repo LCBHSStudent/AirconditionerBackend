@@ -481,6 +481,52 @@ func (ap *AirProcessor) StopWind(msg *message.Message) (err error) {
 	return
 }
 
+// FeeQuery
+func (ap *AirProcessor) QueryFee(msg *message.Message) (err error) {
+	var feequery message.FeeQuery
+	err = json.Unmarshal([]byte(msg.Data), &feequery)
+	if err != nil {
+		fmt.Println("json.Unmarshal fail, err =", err)
+		return
+	}
+
+	var resMsg message.Message
+	var feeQueryRes message.FeeQueryRes
+
+	// 先取出该空调状态数据
+	air, err := ap.Orm.FindByRoom(feequery.RoomNum)
+	if err != nil {
+		return err
+	}
+
+	fee := model.Fee{
+		RoomNum: feequery.RoomNum,
+		Cost: air.TotalPower * model.DefaultFeeRate,
+	}
+
+	feeQueryRes.Code = 200
+	feeQueryRes.Msg = "查询房间账单成功！"
+	feeQueryRes.Fee = fee
+
+	data, err := json.Marshal(feeQueryRes)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	resMsg.Type = message.TypeFeeQueryRes
+	resMsg.Data = string(data)
+	data, err = json.Marshal(resMsg)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	tf := &utils.Transfer{Conn: ap.Conn}
+	err = tf.WritePkg(data)
+	return
+}
+
 // GetReport
 func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 

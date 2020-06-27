@@ -16,7 +16,7 @@ type FeeProcessor struct {
 }
 
 // 插入一条账单信息
-func (fp *FeeProcessor) Add(msg *message.Message) (err error) {
+func (fp *FeeProcessor) Create(msg *message.Message) (err error) {
 	var feeAdd message.FeeAdd
 	err = json.Unmarshal([]byte(msg.Data), &feeAdd)
 	if err != nil {
@@ -29,7 +29,7 @@ func (fp *FeeProcessor) Add(msg *message.Message) (err error) {
 		RoomNum:   feeAdd.RoomNum,
 		Cost:      feeAdd.Cost,
 	}
-	err = fp.Orm.AddFee(fee)
+	err = fp.Orm.Create(fee)
 	if err != nil {
 		fmt.Println("db add fee err = ", err)
 		feeAddRes.Code = 500
@@ -72,7 +72,7 @@ func (fp *FeeProcessor) QueryByRoom(msg *message.Message) (err error) {
 
 	roomNum := feeQuery.RoomNum
 
-	fee, err := fp.Orm.QueryFeeByRoomNum(roomNum)
+	fee, err := fp.Orm.QueryByRoomNum(roomNum)
 	if err != nil {
 		feeQueryRes.Code = 500
 		feeQueryRes.Msg = "fp.Orm.QueryFees err"
@@ -116,7 +116,7 @@ func (fp *FeeProcessor) Delete(msg *message.Message) (err error) {
 	roomNum := feeDelete.RoomNum
 
 
-	_, err = fp.Orm.DelFees(roomNum)
+	err = fp.Orm.Delete(roomNum)
 	if err != nil {
 		feeDeleteRes.Code = 500
 		feeDeleteRes.Msg = "fp.Orm.DelFees err"

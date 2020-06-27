@@ -64,10 +64,10 @@ func CreateConnection(conf map[string]interface{}) (*gorm.DB, error) {
 // 初始化空调数据
 func initData(db *gorm.DB) {
 	air := model.AirConditioner{}
-	Orm := repository.AirConditionerOrm{Db: db}
-	for i := 1001; i < 1005; i++ {
+	airOrm := repository.AirConditionerOrm{Db: db}
+	for i := 1001; i < 1006; i++ {
 		air.RoomNum = i
-		Orm.Create(&air)
+		airOrm.Create(&air)
 	}
 	fmt.Println("空调数据库记录初始化成功！")
 }

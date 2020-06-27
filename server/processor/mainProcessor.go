@@ -44,7 +44,6 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	conn := this.Conn
 	userOrm := &repository.UserOrm{Db: this.Db}
 	airOrm := &repository.AirConditionerOrm{Db: this.Db}
-	feeOrm := &repository.FeeOrm{Db: this.Db}
 
 	switch msg.Type {
 	case message.TypeUserRegister:
@@ -91,20 +90,12 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	case message.TypeGetReport:
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
 		err = ap.GetReport(msg)
-
 	case message.TypeSetRoomData:
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
 		err = ap.SetRoomData(msg)
-
-	case message.TypeFeeAdd:
-		fp := FeeProcessor{Conn: conn, Orm: feeOrm}
-		err = fp.Add(msg)
 	case message.TypeFeeQuery:
-		fp := FeeProcessor{Conn: conn, Orm: feeOrm}
-		err = fp.QueryByRoom(msg)
-	case message.TypeFeeDelete:
-		fp := FeeProcessor{Conn: conn, Orm: feeOrm}
-		err = fp.Delete(msg)
+		fp := AirProcessor{Conn: conn, Orm: airOrm}
+		err = fp.QueryFee(msg)
 
 	default:
 		fmt.Println("消息类型不存在，无法处理...")
