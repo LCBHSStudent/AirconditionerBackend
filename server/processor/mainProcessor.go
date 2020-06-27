@@ -92,9 +92,9 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
 		err = ap.GetReport(msg)
 
-	case message.TypeAirConditionerSendTotalPower:
+	case message.TypeSetRoomData:
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
-		err = ap.SetTotalPower(msg)
+		err = ap.SetRoomData(msg)
 
 	case message.TypeFeeAdd:
 		fp := FeeProcessor{Conn: conn, Orm: feeOrm}

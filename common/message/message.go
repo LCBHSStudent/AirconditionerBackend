@@ -26,7 +26,9 @@ const (
 	TypeAirConditionerStopWind      = "AirConditionerStopWind"
 	TypeGetReport                   = "GetReport"
 	TypeGetReportRes                = "GetReportRes"
-	TypeAirConditionerSendTotalPower= "AirConditionerSendTotalPower"
+	TypeSetRoomData					= "SetRoomData"
+	TypeGetDetailList				= "GetDetailList"
+	TypeGetDetailListRes			= "GetDetailListRes"
 
 	TypeFeeAdd       = "FeeAdd"
 	TypeFeeQuery     = "FeeQuery"
@@ -101,8 +103,6 @@ type AirConditionerFindByRoomRes struct {
 	AirConditioner model.AirConditioner `json:"air_conditioner"` // 返回空调状态数据
 }
 
-type AirConditionerFindAll struct{}
-
 type AirConditionerFindAllRes struct {
 	Code            int                    `json:"code"`             // 状态码
 	Msg             string                 `json:"msg"`              // 返回信息
@@ -119,8 +119,8 @@ type AirConditionerUpdate struct {
 
 type AirConditionerOn struct {
 	RoomNum     int     `json:"room_num"`    // 房间号
-	Mode        int     `json:"mode"`        // 模式
-	WindLevel   int     `json:"wind_level"`  // 风速
+	Mode        string     `json:"mode"`        // 模式
+	WindLevel   string     `json:"wind_level"`  // 风速
 	Temperature float64 `json:"temperature"` // 目标温度
 	OpenTime    int64   `json:"open_time"`   // 开机时间，时间戳格式
 }
@@ -132,8 +132,8 @@ type AirConditionerOff struct {
 
 type AirConditionerSetParam struct {
 	RoomNum     int     `json:"room_num"`    // 房间号
-	Mode        int     `json:"mode"`        // 模式
-	WindLevel   int     `json:"wind_level"`  // 风速
+	Mode        string     `json:"mode"`        // 模式
+	WindLevel   string     `json:"wind_level"`  // 风速
 	Temperature float64 `json:"temperature"` // 目标温度
 }
 
@@ -142,9 +142,10 @@ type AirConditionerStopWind struct {
 	StopWindTime int64 `json:"stop_wind_time"` // 停止送风时间
 }
 
-type AirConditionerSendTotalPower struct {
+type SetRoomData struct {
 	RoomNum      int   	 `json:"room_num"`
 	TotalPower 	 float64 `json:"total_power"` // 总耗电量
+	RoomTemperature float64 `json:"room_temperature"` // 房间温度
 }
 
 //
@@ -170,4 +171,18 @@ type GetReportRes struct {
 	Code    int            `json:"code"`    // 状态码
 	Msg     string         `json:"msg"`     // 返回信息
 	Reports []model.Report `json:"reports"` // 报表数组
+}
+
+type GetDetailList struct {
+	RoomNum      int   	 `json:"room_num"`
+}
+
+// 房间号、开始送风时间、结束送风时间、送风时长、风速、费率、费用。
+type GetDetailListRes struct {
+	RoomNum      	int   	 `json:"room_num"`
+	StartWindList	[]int64	 `json:"start_wind_list"`
+	StoptWindList	[]int64	 `json:"stop_wind_list"`
+	TotalWindTime   int64	 `json:"total_wind_time"`
+	WindLevel		string 	 `json:"wind_level"`
+	TotalFee		float64	 `json:"total_fee"`
 }

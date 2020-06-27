@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/wxmsummer/AirConditioner/client/process"
-	"github.com/wxmsummer/AirConditioner/common/message"
+	//"github.com/wxmsummer/AirConditioner/common/message"
 )
 
 func main() {
@@ -13,19 +13,27 @@ func main() {
 
 	// powerOn := message.AirConditionerOn{
 	// 	RoomNum:     1001,
-	// 	Mode:        1,
-	// 	WindLevel:   1,
-	// 	Temperature: 25.5,
+	// 	Mode:        "cold",
+	// 	WindLevel:   "low",
+	// 	Temperature: 26,
 	// 	OpenTime:    1591873406,
 	// }
 	// _ = up.PowerOn(powerOn)
 
-	setParam := message.AirConditionerSetParam {
-		RoomNum: 1001,
-		Mode: 2,
-		WindLevel: 2,
-		Temperature: 26,
-	}
+	// powerOff := message.AirConditionerOff{
+	// 	RoomNum:     1001,
+	// 	CloseTime:    1591873406,
+	// }
+	// _ = up.PowerOff(powerOff)
 
-	_ = up.SetParam(setParam)
+	// setParam := message.AirConditionerSetParam {
+	// 	RoomNum: 1001,
+	// 	Mode: "cold",
+	// 	WindLevel: "high",
+	// 	Temperature: 26,
+	// }
+
+	// _ = up.SetParam(setParam)
+
+	_ = up.WatchAir()
 }

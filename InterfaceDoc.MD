@@ -189,8 +189,8 @@
     "type":"AirConditionerOn",
     "data":{
         "room_num": 101,          //房间号
-    	"mode": 1,                //模式（0制冷/1制热）
-   	 	"wind_level": 1,          //风速	
+    	"mode": "cold",                //模式（0制冷/1制热）
+   	 	"wind_level": "low",          //风速	
     	"temperature": 25.5,      //目标温度
     	"open_time": 1591873406   //开机时间，时间戳格式
     }
@@ -211,8 +211,8 @@
     "type":"AirConditionerSetParam",
     "data":{
         "room_num":101, //房间号
-    	"mode":1,
-    	"wind_level":"",
+    	"mode": "cold",                //模式（0制冷/1制热）
+   	 	"wind_level": "high",          //风速
     	"temperature":25.5
     }
 }
@@ -241,21 +241,22 @@
 }
 ```
 
-​	1.4  定时发送（总）耗电量 **待完善
+​	1.4  定时发送房间（总）耗电量和房间温度
 
 ```json
 //客户端发送
 {
-	"type":"AirConditionerSendTotalPower",
+	"type":"SetRoomData",
     "data":{
         "room_num":101, //房间号
-    	"total_power":12.3 // 总耗电量
+        "total_power":12.3, // 总耗电量
+        "room_temperature":28 // 房间温度
     }
 }
 //服务端返回
 {
     "code":"200",   
-    "messege":"设置空调耗电量成功！"  
+    "messege":"设置空调耗电量和房间温度成功！"  
 }
 ```
 
@@ -382,7 +383,7 @@
 ```json
 //客户端发送
 {
-	"type":"",
+	"type":"GetDetailList",
     "data":
     {
         "room_num":101,         //房间号

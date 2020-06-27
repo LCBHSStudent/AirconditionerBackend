@@ -59,12 +59,6 @@ func (ap *AirProcessor) FindByRoom(msg *message.Message) (err error) {
 
 // FindAll 查询所有空调状态
 func (ap *AirProcessor) FindAll(msg *message.Message) (err error) {
-	var findAll message.AirConditionerFindAll
-	err = json.Unmarshal([]byte(msg.Data), &findAll)
-	if err != nil {
-		fmt.Println("json.Unmarshal fail, err =", err)
-		return
-	}
 
 	var resMsg message.Message
 	var findAllRes message.AirConditionerFindAllRes
@@ -291,6 +285,7 @@ func (ap *AirProcessor) PowerOff(msg *message.Message) (err error) {
 		air.CloseTime = string(res)
 	}
 	air.Power = model.PowerOff
+	fmt.Println("air.Power:", air.Power)
 	err = ap.Orm.Update(air)
 	if err != nil {
 		fmt.Println("ap.Orm.Update(airConditioner) err=", err)
@@ -372,9 +367,9 @@ func (ap *AirProcessor) SetParam(msg *message.Message) (err error) {
 	return
 }
 
-func (ap *AirProcessor) SetTotalPower(msg *message.Message) (err error) {
-	var sendTotalPower message.AirConditionerSendTotalPower
-	err = json.Unmarshal([]byte(msg.Data), &sendTotalPower)
+func (ap *AirProcessor) SetRoomData(msg *message.Message) (err error) {
+	var setRoomData message.SetRoomData
+	err = json.Unmarshal([]byte(msg.Data), &setRoomData)
 	if err != nil {
 		fmt.Println("json.Unmarshal fail, err =", err)
 		return
@@ -384,13 +379,14 @@ func (ap *AirProcessor) SetTotalPower(msg *message.Message) (err error) {
 	var normalRes message.NormalRes
 
 	// 先取出该空调状态数据
-	air, err := ap.Orm.FindByRoom(sendTotalPower.RoomNum)
+	air, err := ap.Orm.FindByRoom(setRoomData.RoomNum)
 	if err != nil {
 		return err
 	}
 
 	// 设置相应参数
-	air.TotalPower = sendTotalPower.TotalPower
+	air.TotalPower = setRoomData.TotalPower
+	air.RoomTemperature = setRoomData.RoomTemperature
 
 	err = ap.Orm.Update(air)
 	if err != nil {
@@ -399,7 +395,7 @@ func (ap *AirProcessor) SetTotalPower(msg *message.Message) (err error) {
 	}
 
 	normalRes.Code = 200
-	normalRes.Msg = "设置空调耗电量成功！"
+	normalRes.Msg = "设置空调耗电量和房间温度成功！"
 
 	data, err := json.Marshal(normalRes)
 	if err != nil {
@@ -543,3 +539,5 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 	err = tf.WritePkg(data)
 	return
 }
+
+

@@ -2,23 +2,23 @@ package model
 
 const (
 	// 电源开关
-	PowerOff = 0
-	PowerOn  = 1
-
+	PowerOn  = "on"
+	PowerOff = "off"
+	
 	// 空调模式
-	ModeCold      = 0 // 制冷
-	ModeHot       = 1 // 制热
-	ModeWind      = 2 // 送风
-	ModeDry       = 3 // 干燥
-	ModeSleep     = 4 // 睡眠
-	ModeSwingFlap = 5
-	ModeBreath    = 6
+	ModeCold      = "cold" // 制冷
+	ModeHot       = "hot" // 制热
+	ModeWind      = "wind" // 送风
+	ModeDry       = "dry" // 干燥
+	ModeSleep     = "sleep" // 睡眠
+	ModeSwingFlap = "swing"
+	ModeBreath    = "breath"
 
 	// 风速
-	WindAuto = 0
-	WindLow  = 1
-	WindMid  = 2
-	WindHigh = 3
+	WindAuto = "auto"
+	WindLow  = "low"
+	WindMid  = "mid"
+	WindHigh = "high"
 
 	// 空调初始化温度
 	InitTemperature = 25
@@ -27,9 +27,9 @@ const (
 // 空调数据结构
 type AirConditioner struct {
 	RoomNum         int     `json:"room_num" gorm:"not null;unique"` // 空调所在房间号，默认一个房间一个空调(中央空调形式)
-	Power           int     `json:"power"`                           // 电源开关：0关 1开
-	Mode            int     `json:"mode"`                            // 模式
-	WindLevel       int     `json:"wind_level"`                      // 风速
+	Power           string  `json:"power"`                           // 电源开关：on开 off关
+	Mode            string  `json:"mode"`                            // 模式
+	WindLevel       string  `json:"wind_level"`                      // 风速
 	Temperature     float64 `json:"temperature"`                     // 温度
 	RoomTemperature float64 `json:"room_temperature"`                // 室温
 	TotalPower      float64 `json:"total_power"`                     // 该次入住的总耗电量
