@@ -19,8 +19,9 @@ const (
 	// 服务队列最大数量
 	MaxServerNum = 3
 	// 时间片
-	TimeSlice = 5
-
+	TimeSlice = 120
+	// 内层时间片
+	TimeGap = 5
 )
 
 type WindTime struct {
@@ -33,11 +34,19 @@ var windTimeMap = make(map[int]WindTime)
 
 func Schedule(){
 
+
 	for {
 
 		fmt.Println("RequestQueue:", RequestQueue)
 		fmt.Println("ServingQueue:", ServingQueue)
 		fmt.Println("WatingQueue:", WatingQueue)
+
+		for i:=0; i<int(TimeSlice/TimeGap); i++ {
+			if len(RequestQueue) != 0{
+				break
+			}
+			time.Sleep(time.Second * TimeGap)
+		}
 
 		roundRobin()
 
@@ -107,7 +116,6 @@ func Schedule(){
 			}
 		}
 
-		time.Sleep(time.Second * TimeSlice)
 	}
 }
 
