@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/wxmsummer/AirConditioner/client/process"
-	//"github.com/wxmsummer/AirConditioner/common/message"
+	"github.com/wxmsummer/AirConditioner/common/message"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 
 	// powerOff := message.AirConditionerOff{
 	// 	RoomNum:     1001,
-	// 	CloseTime:    1591873406,
+	// 	CloseTime:    1591873506,
 	// }
 	// _ = up.PowerOff(powerOff)
 
@@ -37,5 +37,10 @@ func main() {
 
 	// _ = up.WatchAir()
 
-	_ = up.GetReport()
+	// _ = up.GetReport()
+
+	getDetail := message.GetDetailList{
+		RoomNum: 1001,
+	}
+	_ = up.GetDetail(getDetail)
 }

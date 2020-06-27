@@ -553,7 +553,7 @@ func (ap *AirProcessor) GetReport(msg *message.Message) (err error) {
 
 		for i := 0; i < len(closeTimeList); i++ {
 			// 计算空调的总开机时长：用关机数组的值逐个减去开机数组的值
-			report.UsedTime += int(air.CloseTime[i] - air.OpenTime[i])
+			report.UsedTime += int(closeTimeList[i] - openTimeList[i])
 		}
 
 		// 将空调报表逐个添加到 getReportRes.Reports 中
@@ -624,6 +624,7 @@ func (ap *AirProcessor) GetDetailList(msg *message.Message) (err error) {
 
 	getDetailListRes.Code = 200
 	getDetailListRes.Msg = "获取详单成功！"
+	getDetailListRes.Detail = detail
 
 	data, err := json.Marshal(getDetailListRes)
 	if err != nil {
