@@ -100,6 +100,10 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 		fp := AirProcessor{Conn: conn, Orm: airOrm}
 		err = fp.QueryFee(msg)
 
+	case message.TypeGetServingQueue:
+		sp := &ScheduleProcessor{Conn: conn}
+		err = sp.GetServingQueue(msg)
+
 	default:
 		fmt.Println("消息类型不存在，无法处理...")
 	}

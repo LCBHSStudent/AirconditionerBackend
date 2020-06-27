@@ -7,7 +7,9 @@ import (
 	"github.com/wxmsummer/AirConditioner/common/utils"
 	"github.com/wxmsummer/AirConditioner/server/model"
 	"github.com/wxmsummer/AirConditioner/server/repository"
+	"github.com/wxmsummer/AirConditioner/server/scheduler"
 	"net"
+	"time"
 )
 
 type AirProcessor struct {
@@ -227,6 +229,15 @@ func (ap *AirProcessor) PowerOn(msg *message.Message) (err error) {
 		return
 	}
 
+	ScheduleReq := scheduler.ScheduleReq{
+		RoomNum: air.RoomNum,
+		Power: "on",
+		WindLevel: model.LevelMap[air.WindLevel],
+		ArivingTime: time.Now().Unix(),
+	}
+
+	scheduler.AddScheduleReq(ScheduleReq)
+
 	normalRes.Code = 200
 	normalRes.Msg = "开机成功！"
 
@@ -291,6 +302,15 @@ func (ap *AirProcessor) PowerOff(msg *message.Message) (err error) {
 		fmt.Println("ap.Orm.Update(airConditioner) err=", err)
 		return
 	}
+
+	ScheduleReq := scheduler.ScheduleReq{
+		RoomNum: air.RoomNum,
+		Power: "off",
+		WindLevel: model.LevelMap[air.WindLevel],
+		ArivingTime: time.Now().Unix(),
+	}
+
+	scheduler.AddScheduleReq(ScheduleReq)
 
 	normalRes.Code = 200
 	normalRes.Msg = "关机成功！"

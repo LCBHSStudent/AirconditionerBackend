@@ -2,27 +2,27 @@ package main
 
 import (
 	"github.com/wxmsummer/AirConditioner/client/process"
-	"github.com/wxmsummer/AirConditioner/common/message"
+	//"github.com/wxmsummer/AirConditioner/common/message"
 )
 
 func main() {
 
 	// 测试AirProcessor.Create()
-	up := &process.AirProcessor{}
-	// _ = up.Create(1002)
+	// up := &process.AirProcessor{}
+	// // _ = up.Create(1002)
 
 	// powerOn := message.AirConditionerOn{
-	// 	RoomNum:     1001,
+	// 	RoomNum:     1005,
 	// 	Mode:        "cold",
-	// 	WindLevel:   "low",
+	// 	WindLevel:   "high",
 	// 	Temperature: 26,
-	// 	OpenTime:    1591873406,
+	// 	OpenTime:    1591873607,
 	// }
 	// _ = up.PowerOn(powerOn)
 
 	// powerOff := message.AirConditionerOff{
-	// 	RoomNum:     1001,
-	// 	CloseTime:    1591873506,
+	// 	RoomNum:     1005,
+	// 	CloseTime:    1591873628,
 	// }
 	// _ = up.PowerOff(powerOff)
 
@@ -39,8 +39,11 @@ func main() {
 
 	// _ = up.GetReport()
 
-	getDetail := message.GetDetailList{
-		RoomNum: 1001,
-	}
-	_ = up.GetDetail(getDetail)
+	// getDetail := message.GetDetailList{
+	// 	RoomNum: 1001,
+	// }
+	// _ = up.GetDetail(getDetail)
+
+	sp := &process.ScheduleProcessor{}
+	_ = sp.GetServingQueue()
 }

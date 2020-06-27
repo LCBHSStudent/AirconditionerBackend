@@ -34,6 +34,9 @@ const (
 	TypeFeeQuery     = "FeeQuery"
 	TypeFeeQueryRes  = "FeeQueryRes"
 	TypeFeeDelete    = "FeeDelete"
+
+	TypeGetServingQueue = "GetServingQueue"
+	TypeGetServingQueueRes = "GetServingQueueRes"
 )
 
 // 定义消息结构体
@@ -182,4 +185,10 @@ type GetDetailListRes struct {
 	Code    int            `json:"code"`    // 状态码
 	Msg     string         `json:"msg"`     // 返回信息
 	Detail  model.Detail	`json:"detail"` // 详单
+}
+
+type GetServingQueueRes struct {
+	Code    int            `json:"code"`    		// 状态码
+	Msg     string         `json:"msg"`     		// 返回信息
+	ServingQueue  []int		`json:"serving_queue"` 	// 服务队列
 }

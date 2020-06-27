@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/wxmsummer/AirConditioner/server/database"
 	"github.com/wxmsummer/AirConditioner/server/processor"
+	"github.com/wxmsummer/AirConditioner/server/scheduler"
 	"io"
 	"log"
 	"net"
@@ -38,6 +39,9 @@ func main() {
 		return
 	}
 	defer listen.Close()
+
+	go scheduler.Schedule()
+	
 	for {
 		conn, err := listen.Accept()
 		if err != nil {

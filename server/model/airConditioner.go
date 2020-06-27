@@ -24,6 +24,12 @@ const (
 	InitTemperature = 25
 )
 
+var LevelMap = map[string]int{
+	"low":1,
+	"mid":2,
+	"high":3,
+}
+
 // 空调数据结构
 type AirConditioner struct {
 	RoomNum         int     `json:"room_num" gorm:"not null;unique"` // 空调所在房间号，默认一个房间一个空调(中央空调形式)
@@ -39,3 +45,4 @@ type AirConditioner struct {
 	CloseTime       string  `json:"close_time"`                      // 关机时间，数组
 	SetParamNum     int     `json:"set_param_num"`                   // 调整次数，用于报表展示
 }
+
