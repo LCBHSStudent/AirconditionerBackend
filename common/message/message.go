@@ -26,6 +26,7 @@ const (
 	TypeAirConditionerStopWind      = "AirConditionerStopWind"
 	TypeGetReport                   = "GetReport"
 	TypeGetReportRes                = "GetReportRes"
+	TypeAirConditionerSendTotalPower= "AirConditionerSendTotalPower"
 
 	TypeFeeAdd       = "FeeAdd"
 	TypeFeeQuery     = "FeeQuery"
@@ -139,6 +140,11 @@ type AirConditionerSetParam struct {
 type AirConditionerStopWind struct {
 	RoomNum      int   `json:"room_num"`
 	StopWindTime int64 `json:"stop_wind_time"` // 停止送风时间
+}
+
+type AirConditionerSendTotalPower struct {
+	RoomNum      int   	 `json:"room_num"`
+	TotalPower 	 float64 `json:"total_power"` // 总耗电量
 }
 
 //

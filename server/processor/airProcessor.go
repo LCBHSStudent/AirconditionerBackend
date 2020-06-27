@@ -372,6 +372,54 @@ func (ap *AirProcessor) SetParam(msg *message.Message) (err error) {
 	return
 }
 
+func (ap *AirProcessor) SetTotalPower(msg *message.Message) (err error) {
+	var sendTotalPower message.AirConditionerSendTotalPower
+	err = json.Unmarshal([]byte(msg.Data), &sendTotalPower)
+	if err != nil {
+		fmt.Println("json.Unmarshal fail, err =", err)
+		return
+	}
+
+	var resMsg message.Message
+	var normalRes message.NormalRes
+
+	// 先取出该空调状态数据
+	air, err := ap.Orm.FindByRoom(sendTotalPower.RoomNum)
+	if err != nil {
+		return err
+	}
+
+	// 设置相应参数
+	air.TotalPower = sendTotalPower.TotalPower
+
+	err = ap.Orm.Update(air)
+	if err != nil {
+		fmt.Println("ap.Orm.Update(airConditioner) err=", err)
+		return
+	}
+
+	normalRes.Code = 200
+	normalRes.Msg = "设置空调耗电量成功！"
+
+	data, err := json.Marshal(normalRes)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	resMsg.Type = message.TypeNormalRes
+	resMsg.Data = string(data)
+	data, err = json.Marshal(resMsg)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	tf := &utils.Transfer{Conn: ap.Conn}
+	err = tf.WritePkg(data)
+	return
+}
+
 // StopWind
 func (ap *AirProcessor) StopWind(msg *message.Message) (err error) {
 	var stopWind message.AirConditionerStopWind

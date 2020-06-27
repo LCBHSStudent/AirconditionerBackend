@@ -209,7 +209,7 @@
 //客户端请求
 {
     "type":"AirConditionerSetParam",
-    data:{
+    "data":{
         "room_num":101, //房间号
     	"mode":1,
     	"wind_level":"",
@@ -246,7 +246,7 @@
 ```json
 //客户端发送
 {
-	"type":"",
+	"type":"AirConditionerSendTotalPower",
     "data":{
         "room_num":101, //房间号
     	"total_power":12.3 // 总耗电量
