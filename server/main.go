@@ -41,6 +41,7 @@ func main() {
 	defer listen.Close()
 
 	go scheduler.Schedule()
+	go scheduler.RoundRobin()
 	
 	for {
 		conn, err := listen.Accept()

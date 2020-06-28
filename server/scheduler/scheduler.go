@@ -35,18 +35,9 @@ var windTimeMap = make(map[int]WindTime)
 func Schedule(){
 
 	for {
-		rrFlag := true
-
 		fmt.Println("RequestQueue:", RequestQueue)
 		fmt.Println("ServingQueue:", ServingQueue)
 		fmt.Println("WatingQueue:", WatingQueue)
-
-		for i:=0; i<int(TimeSlice/TimeGap); i++ {
-			if len(RequestQueue) != 0{
-				break
-			}
-			time.Sleep(time.Second * TimeGap)
-		}
 
 		// 处理等待队列和服务队列
 		for len(ServingQueue) < MaxServerNum {
@@ -57,18 +48,14 @@ func Schedule(){
 				nowReq := RequestQueue[0]
 				if flag := checkWindStop(nowReq); flag{
 					RequestQueue = RequestQueue[1:]
-					rrFlag = false
 					continue
 				}
 				if flag := checkPowerOff(nowReq); flag{
 					RequestQueue = RequestQueue[1:]
-					rrFlag = false
 					continue
 				}
 				if flag := checkWindChange(nowReq); flag{
 					RequestQueue = RequestQueue[1:]
-					// 替换风速也不RR
-					rrFlag = false
 					continue
 				}
 				ServingQueue = append(ServingQueue, nowReq)
@@ -82,18 +69,14 @@ func Schedule(){
 				nowReq := RequestQueue[i]
 
 				if flag := checkWindStop(nowReq); flag{
-					rrFlag = false
 					continue
 				}
 
 				if flag := checkPowerOff(nowReq); flag{
-					rrFlag = false
 					continue
 				}
 
 				if flag := checkWindChange(nowReq); flag{
-					// 替换风速也不RR
-					rrFlag = false
 					continue
 				}
 
@@ -106,13 +89,11 @@ func Schedule(){
 						// 并且立即服务高风速请求
 						ServingQueue[j] = nowReq
 						// 跳出查找，同时接下来不进行RR调度
-						rrFlag = false
 						break
 					}
 					if j == len(ServingQueue)-1 {
 						// 否则，如果服务队列中的优先级都比当前请求高，就将该请求加入等待队列的末尾
 						WatingQueue = append(WatingQueue, nowReq)
-						rrFlag = false
 					}
 				}
 			}
@@ -129,33 +110,34 @@ func Schedule(){
 				nowReq := WatingQueue[0]
 				ServingQueue = append(ServingQueue, nowReq)
 				WatingQueue = WatingQueue[1:]
-				rrFlag = false
 			}
 		}
 
-		if rrFlag{
-			roundRobin()
-		}
-
+		time.Sleep(time.Second * TimeGap)
 	}
 }
 
 // 轮询调度
-func roundRobin(){
-	// 如果当前服务队列满
-	if len(ServingQueue) == MaxServerNum {
-		// 如果等待队列非空，则进行时间片调度
-		if len(WatingQueue) != 0 {
-			// 等待队列的末尾加上服务队列的第一个元素
-			WatingQueue = append(WatingQueue, ServingQueue[0])
-			// 将服务队列的第一个元素删除
-			ServingQueue = ServingQueue[1:]
-			// 服务队列的末尾加上等待队列的第一个元素
-			ServingQueue = append(ServingQueue, WatingQueue[0])
-			// 将等待队列的第一个元素删除
-			WatingQueue = WatingQueue[1:]
+func RoundRobin(){
+
+	for{
+		// 如果当前服务队列满
+		if len(ServingQueue) == MaxServerNum {
+			// 如果等待队列非空，则进行时间片调度
+			if len(WatingQueue) != 0 {
+				// 等待队列的末尾加上服务队列的第一个元素
+				WatingQueue = append(WatingQueue, ServingQueue[0])
+				// 将服务队列的第一个元素删除
+				ServingQueue = ServingQueue[1:]
+				// 服务队列的末尾加上等待队列的第一个元素
+				ServingQueue = append(ServingQueue, WatingQueue[0])
+				// 将等待队列的第一个元素删除
+				WatingQueue = WatingQueue[1:]
+			}
 		}
+		time.Sleep(time.Second*TimeSlice)
 	}
+
 }
 
 // 如果请求队列中有关机请求，就移出队列
