@@ -12,14 +12,14 @@ func main() {
 	up := &process.AirProcessor{}
 	// // _ = up.Create(1002)
 
-	powerOn := message.AirConditionerOn{
-		RoomNum:     1001,
-		Mode:        "cold",
-		WindLevel:   "mid",
-		Temperature: 26,
-		OpenTime:    1591873607,
-	}
-	_ = up.PowerOn(powerOn)
+	// powerOn := message.AirConditionerOn{
+	// 	RoomNum:     1004,
+	// 	Mode:        "cold",
+	// 	WindLevel:   "mid",
+	// 	Temperature: 26,
+	// 	OpenTime:    1591873607,
+	// }
+	// _ = up.PowerOn(powerOn)
 
 	// powerOff := message.AirConditionerOff{
 	// 	RoomNum:     1001,
@@ -27,14 +27,15 @@ func main() {
 	// }
 	// _ = up.PowerOff(powerOff)
 
-	// setParam := message.AirConditionerSetParam {
-	// 	RoomNum: 1001,
-	// 	Mode: "cold",
-	// 	WindLevel: "high",
-	// 	Temperature: 26,
-	// }
+	setParam := message.AirConditionerSetParam {
+		RoomNum: 1002,
+		Mode: "cold",
+		WindLevel: "high",
+		Temperature: 26,
+		WindFlag: 1,
+	}
 
-	// _ = up.SetParam(setParam)
+	_ = up.SetParam(setParam)
 
 	// _ = up.WatchAir()
 

@@ -213,7 +213,8 @@
         "room_num":101, //房间号
     	"mode": "cold",                //模式（0制冷/1制热）
    	 	"wind_level": "high",          //风速
-    	"temperature":25.5
+        "temperature":25.5,
+        "wind_flag":1                   // 表示是否改变风速，0不改变，1改变
     }
 }
 //服务端返回

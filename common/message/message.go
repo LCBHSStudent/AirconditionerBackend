@@ -138,6 +138,7 @@ type AirConditionerSetParam struct {
 	Mode        string     `json:"mode"`        // 模式
 	WindLevel   string     `json:"wind_level"`  // 风速
 	Temperature float64 `json:"temperature"` // 目标温度
+	WindFlag	int		`json:"wind_flag"`	// 标志是否改变风速，0不改变，1改变
 }
 
 type AirConditionerStopWind struct {

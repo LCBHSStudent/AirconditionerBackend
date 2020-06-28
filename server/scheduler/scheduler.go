@@ -57,10 +57,18 @@ func Schedule(){
 				nowReq := RequestQueue[0]
 				if flag := checkWindStop(nowReq); flag{
 					RequestQueue = RequestQueue[1:]
+					rrFlag = false
 					continue
 				}
 				if flag := checkPowerOff(nowReq); flag{
 					RequestQueue = RequestQueue[1:]
+					rrFlag = false
+					continue
+				}
+				if flag := checkWindChange(nowReq); flag{
+					RequestQueue = RequestQueue[1:]
+					// 替换风速也不RR
+					rrFlag = false
 					continue
 				}
 				ServingQueue = append(ServingQueue, nowReq)
@@ -74,10 +82,18 @@ func Schedule(){
 				nowReq := RequestQueue[i]
 
 				if flag := checkWindStop(nowReq); flag{
+					rrFlag = false
 					continue
 				}
 
 				if flag := checkPowerOff(nowReq); flag{
+					rrFlag = false
+					continue
+				}
+
+				if flag := checkWindChange(nowReq); flag{
+					// 替换风速也不RR
+					rrFlag = false
 					continue
 				}
 
@@ -96,6 +112,7 @@ func Schedule(){
 					if j == len(ServingQueue)-1 {
 						// 否则，如果服务队列中的优先级都比当前请求高，就将该请求加入等待队列的末尾
 						WatingQueue = append(WatingQueue, nowReq)
+						rrFlag = false
 					}
 				}
 			}
@@ -112,6 +129,7 @@ func Schedule(){
 				nowReq := WatingQueue[0]
 				ServingQueue = append(ServingQueue, nowReq)
 				WatingQueue = WatingQueue[1:]
+				rrFlag = false
 			}
 		}
 
@@ -179,6 +197,30 @@ func checkWindStop(nowReq ScheduleReq) (flag bool) {
 			if WatingQueue[i].RoomNum == nowReq.RoomNum {
 				WatingQueue = append(WatingQueue[:i], WatingQueue[i+1:]...)
 				fmt.Println("checkWindStop... remove from WatingQueue")
+				flag = true
+			}
+		}
+	}
+	return flag
+}
+
+func checkWindChange(nowReq ScheduleReq) (flag bool) {
+
+	flag = false
+	// 如果改变风速，就替换原来的风速等级
+	if nowReq.WindFlag == 1 {
+		for i := 0; i < len(ServingQueue); i++ {
+			if ServingQueue[i].RoomNum == nowReq.RoomNum {
+				ServingQueue[i] = nowReq
+				fmt.Println("checkWindChange... change from ServingQueue")
+				flag = true
+			}
+		}
+
+		for i := 0; i < len(WatingQueue); i++ {
+			if WatingQueue[i].RoomNum == nowReq.RoomNum {
+				WatingQueue[i] = nowReq
+				fmt.Println("checkWindChange... change from WatingQueue")
 				flag = true
 			}
 		}

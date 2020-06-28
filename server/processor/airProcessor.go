@@ -365,6 +365,18 @@ func (ap *AirProcessor) SetParam(msg *message.Message) (err error) {
 		return
 	}
 
+	// 如果该请求改变了风速，就将请求放到请求队列
+	if setParam.WindFlag == 1{
+		scheduleReq := scheduler.ScheduleReq{
+			RoomNum: air.RoomNum,
+			Power: "on",
+			WindLevel: model.LevelMap[air.WindLevel],
+			ArivingTime: time.Now().Unix(),
+			WindFlag: 1,
+		}
+		scheduler.AddScheduleReq(scheduleReq)
+	}
+
 	normalRes.Code = 200
 	normalRes.Msg = "调整空调参数成功！"
 
