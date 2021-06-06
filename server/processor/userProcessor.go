@@ -252,5 +252,5 @@ func (up *UserProcessor) Update(msg *message.Message) (err error) {
 }
 
 func (up *UserProcessor) Checkout (msg *message.Message) (err error) {
-	
+	return nil
 }
