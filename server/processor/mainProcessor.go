@@ -43,7 +43,7 @@ func (this *MainProcessor) Process() (err error) {
 func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	conn := this.Conn
 	admOrm := &repository.AdminOrm{Db: this.Db}
-	// feeOrm := &repository.FeeOrm{Db: this.Db}
+	feeOrm := &repository.FeeOrm{Db: this.Db}
 	userOrm := &repository.UserOrm{Db: this.Db}
 	airOrm := &repository.AirConditionerOrm{Db: this.Db}
 
@@ -99,8 +99,8 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 		ap := &AirProcessor{Conn: conn, Orm: airOrm}
 		err = ap.SetRoomData(msg)
 	case message.TypeFeeQuery:
-		fp := AirProcessor{Conn: conn, Orm: airOrm}
-		err = fp.QueryFee(msg)
+		fp := FeeProcessor{Conn: conn, Orm: feeOrm}
+		err = fp.QueryByRoom(msg)
 
 	case message.TypeGetServingQueue:
 		sp := &ScheduleProcessor{Conn: conn}
@@ -113,6 +113,10 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	case message.TypeAdminLogin:
 		adp := &AdminProcessor{Conn: conn, Orm: admOrm}
 		err = adp.AdminSignIn(msg)
+
+	case message.TypeUserCheckout:
+		up := &UserProcessor{Conn: conn, Orm: userOrm}
+		err = up.Checkout(msg)
 
 	default:
 		fmt.Println("消息类型不存在，无法处理...")

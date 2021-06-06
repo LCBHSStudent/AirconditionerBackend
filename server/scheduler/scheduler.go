@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"fmt"
+	"github.com/wxmsummer/AirConditioner/server/model"
 	"github.com/wxmsummer/AirConditioner/server/repository"
 	"gorm.io/gorm"
 	"log"
@@ -128,6 +129,29 @@ func Schedule(){
 					if room.Power != "on" {
 						continue
 					}
+					fo := repository.FeeOrm{Db: SchedulerDB}
+					fee, err2 := fo.QueryByRoomNum(room.RoomNum)
+					if err2 != nil {
+						log.Println(err)
+						fee.RoomNum = room.RoomNum
+						fee.Cost = 0
+						err := fo.Create(&fee)
+						if err != nil {
+							log.Println(err)
+						}
+					} else {
+						fee.Cost += float64(model.LevelMap[room.WindLevel]) * model.DefaultFeeRate * 0.005
+						err := fo.Update(&fee)
+						if err != nil {
+							log.Println(err)
+						}
+						room.TotalFee = fee.Cost
+						err = airOrm.Update(room)
+						if err != nil {
+							log.Println(err)
+						}
+					}
+
 					if room.Temperature != room.RoomTemperature {
 						if math.Abs(room.Temperature - room.RoomTemperature) < 0.5 {
 							room.RoomTemperature = room.Temperature
@@ -144,7 +168,6 @@ func Schedule(){
 				}
 			}
 		}
-
 		time.Sleep(time.Second * TimeGap)
 	}
 }

@@ -27,6 +27,17 @@ func (up *UserProcessor) Register(msg *message.Message) (err error) {
 		return
 	}
 
+	feOrm := repository.FeeOrm{Db: up.Orm.Db}
+	fee := model.Fee{
+		RoomNum: userRegister.RoomNum,
+		Cost:    0.0,
+	}
+
+	err = feOrm.Create(&fee)
+	if err != nil {
+		log.Println(err)
+	}
+
 	var resMsg message.Message
 	var userRegisterRes message.NormalRes
 
@@ -252,5 +263,70 @@ func (up *UserProcessor) Update(msg *message.Message) (err error) {
 }
 
 func (up *UserProcessor) Checkout (msg *message.Message) (err error) {
-	return nil
+	var req message.UserCheckout
+	err = json.Unmarshal([]byte(msg.Data), &req)
+	if err != nil {
+		return err
+	}
+
+	var resMsg message.Message
+	resMsg.Type = message.TypeNormalRes
+
+	var checkoutRes message.NormalRes
+
+	users, err := up.Orm.FindByField("room_num",strconv.Itoa(req.RoomNum), "")
+	if err != nil {
+		checkoutRes.Code = 400
+		checkoutRes.Msg = "查询用户失败"
+	} else if len(users) == 0 {
+		checkoutRes.Code = 400
+		checkoutRes.Msg = "房间不存在或房间不存在用户"
+	} else {
+		up.Orm.Db.Model(&model.User{}).Delete(users[0])
+
+		airOrm := repository.AirConditionerOrm{Db: up.Orm.Db}
+		deInitAir := model.AirConditioner{
+			RoomNum:         req.RoomNum,
+			Power:           "",
+			Mode:            "",
+			WindLevel:       "",
+			Temperature:     0,
+			RoomTemperature: 0,
+			TotalPower:      0,
+			TotalFee:        0,
+			StartWind:       "",
+			StopWind:        "",
+			OpenTime:        "",
+			CloseTime:       "",
+			SetParamNum:     0,
+		}
+		airOrm.Db.Delete(deInitAir, "room_num = " + strconv.Itoa(req.RoomNum))
+		airOrm.Db.Create(deInitAir)
+
+		fo := repository.FeeOrm{Db: up.Orm.Db}
+		err = fo.Delete(req.RoomNum)
+		if err != nil {
+			return err
+		}
+
+		checkoutRes.Code = 200
+		checkoutRes.Msg = "用户退房成功"
+	}
+
+	data, err := json.Marshal(checkoutRes)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	resMsg.Data = string(data)
+	data, err = json.Marshal(resMsg)
+	if err != nil {
+		fmt.Println("json.Marshal fail, err=", err)
+		return
+	}
+
+	tf := &utils.Transfer{Conn: up.Conn}
+	err = tf.WritePkg(data)
+	return
 }

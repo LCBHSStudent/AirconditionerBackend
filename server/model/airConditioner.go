@@ -40,6 +40,7 @@ type AirConditioner struct {
 	Temperature     float64 `json:"temperature"`                     // 温度
 	RoomTemperature float64 `json:"room_temperature"`                // 室温
 	TotalPower      float64 `json:"total_power"`                     // 该次入住的总耗电量
+	TotalFee		float64	`json:"total_fee"`						 // 该次入住的总费用
 	StartWind       string  `json:"start_wind" gorm:"type:TEXT"`     // 开始送风时间，时间戳格式
 	StopWind        string  `json:"stop_wind" gorm:"type:TEXT"`      // 停止送风时间
 	OpenTime        string  `json:"open_time" gorm:"type:TEXT"`      // 开机时间，数组，如 [1,2,3,4] ，由于mysql不支持切片类型，转换为string存储

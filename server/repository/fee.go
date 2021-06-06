@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/wxmsummer/AirConditioner/server/model"
+	"gorm.io/gorm"
 )
 
 // 账单数据库操作相关接口

@@ -10,6 +10,8 @@ const (
 	TypeUserLogin       = "UserLogin"
 	TypeAdminRegister	= "AdminRegister"
 	TypeAdminLogin		= "AdminLogin"
+	TypeUserCheckout	= "UserCheckout"
+	TypeUserCheckoutRes = "UserCheckoutRes"
 	TypeUserFindById    = "UserFindById"
 	TypeUserFindByIdRes = "UserFindByIdRes"
 	TypeUserFindAll     = "UserFindAll"
@@ -110,6 +112,10 @@ type UserFindAllRes struct {
 
 type UserUpdate struct {
 	User model.User `json:"user"`
+}
+
+type UserCheckout struct {
+	RoomNum	int	`json:"room_num"`
 }
 
 //
