@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/wxmsummer/AirConditioner/server/model"
+	"gorm.io/gorm"
 )
 
 // 用户数据库操作相关接口
@@ -18,20 +18,18 @@ type UserOrm struct {
 	Db *gorm.DB
 }
 
-func (orm *UserOrm) FindById(id int) (model.User, error) {
-	user := model.User{Id: id}
-	err := orm.Db.First(&user).Error
+func (orm *UserOrm) FindById(id int) (user model.User, err error) {
+	err = orm.Db.Select("id = ?", id).First(&user).Error
 	if err != nil {
 		return user, err
 	}
 	return user, nil
 }
 
-func (orm *UserOrm) FindByPhone(phone string) (*model.User, error) {
-	user := &model.User{Phone: phone}
-	err := orm.Db.First(user).Error
+func (orm *UserOrm) FindByPhone(phone string) (user model.User, err error) {
+	err = orm.Db.Select("phone = ?", phone).First(&user).Error
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	return user, nil
 }
@@ -45,7 +43,7 @@ func (orm *UserOrm) Create(user *model.User) error {
 }
 
 func (orm *UserOrm) Update(user *model.User) error {
-	err := orm.Db.Model(user).Update(user).Error
+	err := orm.Db.Model(user).Updates(user).Error
 	if err != nil {
 		return err
 	}

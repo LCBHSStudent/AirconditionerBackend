@@ -7,7 +7,9 @@ import (
 	"github.com/wxmsummer/AirConditioner/common/utils"
 	"github.com/wxmsummer/AirConditioner/server/model"
 	"github.com/wxmsummer/AirConditioner/server/repository"
+	"log"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -28,31 +30,42 @@ func (up *UserProcessor) Register(msg *message.Message) (err error) {
 	var resMsg message.Message
 	var userRegisterRes message.NormalRes
 
-	isExistUser, err := up.Orm.FindByPhone(userRegister.Phone)
-	if err != nil {
-		fmt.Println("up.Orm.FindByPhone(userRegister.Phone) err=", err)
-	}
-	if isExistUser != nil {
+	users, err := up.Orm.FindByField("phone", userRegister.Phone, "")
+	if len(users) != 0 {
 		userRegisterRes.Code = 403
 		userRegisterRes.Msg = message.ErrorUserExists
-		return
-	}
+	} else {
+		users, err := up.Orm.FindByField("room_num", strconv.Itoa(userRegister.RoomNum), "")
+		if len(users) != 0 {
+			userRegisterRes.Code = 400
+			userRegisterRes.Msg = message.ErrorRoomHasUser
+			log.Println(err)
+		}  else {
+			airOrm := repository.AirConditionerOrm{Db: up.Orm.Db}
+			room, err := airOrm.FindByRoom(userRegister.RoomNum)
+			if  room.RoomNum == 0 || err != nil {
+				userRegisterRes.Code = 400
+				userRegisterRes.Msg = message.ErrorRoomNotExist
+			} else {
+				user := &model.User{
+					RoomNum:  userRegister.RoomNum,
+					Phone:    userRegister.Phone,
+					Password: userRegister.Password,
+					CheckIn:  time.Now().Unix(),
+					CheckOut: 0,
+				}
+				err = up.Orm.Create(user)
+				if err != nil {
+					fmt.Println("up.Orm.Create(user) err = ", err)
+					return err
+				}
 
-	user := &model.User{
-		RoomNum:  userRegister.RoomNum,
-		Phone:    userRegister.Phone,
-		Password: userRegister.Password,
-		CheckIn:  time.Now().Unix(),
-		CheckOut: 0,
-	}
-	err = up.Orm.Create(user)
-	if err != nil {
-		fmt.Println("up.Orm.Create(user) err = ", err)
-		return
-	}
+				userRegisterRes.Code = 200
+				userRegisterRes.Msg = "客户登记成功！"
+			}
 
-	userRegisterRes.Code = 200
-	userRegisterRes.Msg = "注册用户成功！"
+		}
+	}
 
 	data, err := json.Marshal(userRegisterRes)
 	if err != nil {
@@ -83,30 +96,28 @@ func (up *UserProcessor) Login(msg *message.Message) (err error) {
 	}
 
 	var resMsg message.Message
-	var userLoginRes message.NormalRes
+	var userLoginRes message.UserLoginRes
 
 	phone := userLogin.Phone
 	password := userLogin.Password
 
-	existUser, err := up.Orm.FindByPhone(phone)
-	if err != nil {
-		fmt.Println("up.Orm.FindByPhone(userLogin.Phone) err =", err)
-		return
-	}
+	resMsg.Type = message.TypeNormalRes
 
-	if existUser.Id == 0 {
+	existUser, err := up.Orm.FindByField("phone", phone, "password, room_num")
+	if len(existUser) == 0 {
 		userLoginRes.Code = 404 // 用户不存在，找不到资源
 		userLoginRes.Msg = message.ErrorUserNotExists
-		return
+	} else {
+		if existUser[0].Password != password {
+			userLoginRes.Code = 401
+			userLoginRes.Msg = message.ErrorUserPwdWrong
+		} else {
+			userLoginRes.Code = 0 // 登陆成功
+			userLoginRes.Msg = "登陆成功!"
+			userLoginRes.RoomNumber = existUser[0].RoomNum
+			resMsg.Type = message.TypeUserLogin
+		}
 	}
-	if existUser.Password != password {
-		userLoginRes.Code = 401
-		userLoginRes.Msg = message.ErrorUserPwdWrong
-		return
-	}
-
-	userLoginRes.Code = 200 // 登陆成功
-	userLoginRes.Msg = "用户登陆成功!"
 
 	data, err := json.Marshal(userLoginRes)
 	if err != nil {
@@ -114,7 +125,6 @@ func (up *UserProcessor) Login(msg *message.Message) (err error) {
 		return
 	}
 
-	resMsg.Type = message.TypeNormalRes
 	resMsg.Data = string(data)
 	data, err = json.Marshal(resMsg)
 	if err != nil {
@@ -128,7 +138,7 @@ func (up *UserProcessor) Login(msg *message.Message) (err error) {
 }
 
 func (up *UserProcessor) FindById(msg *message.Message) (err error) {
-	var userFindById message.UserFindById
+	var userFindById message.UserFindByRoom
 	err = json.Unmarshal([]byte(msg.Data), &userFindById)
 	if err != nil {
 		fmt.Println("json.Unmarshal fail, err =", err)
@@ -138,8 +148,8 @@ func (up *UserProcessor) FindById(msg *message.Message) (err error) {
 	var resMsg message.Message
 	var userFindByIdRes message.UserFindByIdRes
 
-	id := userFindById.Id
-	user, err := up.Orm.FindById(id)
+	roomNumber := userFindById.RoomNumber
+	user, err := up.Orm.FindById(roomNumber)
 	if err != nil {
 		fmt.Println("up.Orm.FindByID(id) err=", err)
 		return err
@@ -239,4 +249,8 @@ func (up *UserProcessor) Update(msg *message.Message) (err error) {
 	tf := &utils.Transfer{Conn: up.Conn}
 	err = tf.WritePkg(data)
 	return
+}
+
+func (up *UserProcessor) Checkout (msg *message.Message) (err error) {
+	
 }

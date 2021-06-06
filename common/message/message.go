@@ -8,6 +8,8 @@ const (
 
 	TypeUserRegister    = "UserRegister"
 	TypeUserLogin       = "UserLogin"
+	TypeAdminRegister	= "AdminRegister"
+	TypeAdminLogin		= "AdminLogin"
 	TypeUserFindById    = "UserFindById"
 	TypeUserFindByIdRes = "UserFindByIdRes"
 	TypeUserFindAll     = "UserFindAll"
@@ -41,15 +43,21 @@ const (
 
 // 定义消息结构体
 type Message struct {
-	Length int    `json:"length"` // 消息长度，用于验证包是否缺失
-	Type   string `json:"type"`   // 消息类型
-	Data   string `json:"data"`   // 消息
+	Length int    		`json:"length"` // 消息长度，用于验证包是否缺失
+	Type   string 		`json:"type"`   // 消息类型
+	Data   string 		`json:"data"`   // 消息
 }
 
 // 普通的消息返回格式，只包含状态码和msg，如需包含额外数据则另外定义返回格式
 type NormalRes struct {
 	Code int    `json:"code"` // 状态码
 	Msg  string `json:"msg"`  // 返回信息
+}
+
+type UserLoginRes struct {
+	Code 		int    `json:"code"` 			// 状态码
+	Msg  		string `json:"msg"`  			// 返回信息
+	RoomNumber 	int `json:"room_number"` // 房间号
 }
 
 // 用户注册消息结构体
@@ -59,14 +67,33 @@ type UserRegister struct {
 	Password string `json:"password"`
 }
 
+// 后台人员注册结构体
+type AdminRegister struct {
+	AuthorityLevel 	int 	`json:"authority_level"`
+	UserName		string 	`json:"user_name"`
+	Password		string 	`json:"password"`
+}
+
 // 用户登录消息结构体
 type UserLogin struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
 
-type UserFindById struct {
-	Id int `json:"id"`
+// 后台人员登录结构体
+type AdminLogin struct {
+	AuthorityLevel 	int 	`json:"authority_level"`
+	UserName		string 	`json:"user_name"`
+	Password		string 	`json:"password"`
+}
+
+type AdminLoginResp struct {
+	StatusCode		int 	`json:"status_code"`
+	Message			string	`json:"message"`
+}
+
+type UserFindByRoom struct {
+	RoomNumber int `json:"room_num"`
 }
 
 type UserFindByIdRes struct {

@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/wxmsummer/AirConditioner/server/database"
 	"github.com/wxmsummer/AirConditioner/server/processor"
 	"github.com/wxmsummer/AirConditioner/server/scheduler"
+	"gorm.io/gorm"
 	"io"
 	"log"
 	"net"
@@ -30,7 +30,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("connection error : %v \n", err)
 	}
-	defer db.Close()
 
 	fmt.Println("服务器在8888端口监听...")
 	listen, err := net.Listen("tcp", "0.0.0.0:8888")

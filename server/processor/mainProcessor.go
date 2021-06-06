@@ -2,10 +2,10 @@ package processor
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/wxmsummer/AirConditioner/common/message"
 	"github.com/wxmsummer/AirConditioner/common/utils"
 	"github.com/wxmsummer/AirConditioner/server/repository"
+	"gorm.io/gorm"
 	"io"
 	"net"
 )
@@ -42,6 +42,8 @@ func (this *MainProcessor) Process() (err error) {
 // 功能：根据客户端发送的消息种类不同，决定调用哪个函数来处理
 func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	conn := this.Conn
+	admOrm := &repository.AdminOrm{Db: this.Db}
+	// feeOrm := &repository.FeeOrm{Db: this.Db}
 	userOrm := &repository.UserOrm{Db: this.Db}
 	airOrm := &repository.AirConditionerOrm{Db: this.Db}
 
@@ -103,6 +105,14 @@ func (this *MainProcessor) serverProcessMsg(msg *message.Message) (err error) {
 	case message.TypeGetServingQueue:
 		sp := &ScheduleProcessor{Conn: conn}
 		err = sp.GetServingQueue(msg)
+
+	case message.TypeAdminRegister:
+		adp := &AdminProcessor{Conn: conn, Orm: admOrm}
+		err = adp.AdminSignUp(msg)
+
+	case message.TypeAdminLogin:
+		adp := &AdminProcessor{Conn: conn, Orm: admOrm}
+		err = adp.AdminSignIn(msg)
 
 	default:
 		fmt.Println("消息类型不存在，无法处理...")

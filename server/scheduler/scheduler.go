@@ -2,6 +2,10 @@ package scheduler
 
 import (
 	"fmt"
+	"github.com/wxmsummer/AirConditioner/server/repository"
+	"gorm.io/gorm"
+	"log"
+	"math"
 	"time"
 )
 
@@ -15,7 +19,6 @@ var ServingQueue []ScheduleReq
 var WatingQueue	 []ScheduleReq
 
 const (
-
 	// 服务队列最大数量
 	MaxServerNum = 3
 	// 时间片
@@ -29,6 +32,8 @@ type WindTime struct {
 	StartWindTime 	[]int64
 	StopWindTime 	[]int64
 }
+
+var SchedulerDB *gorm.DB
 
 var windTimeMap = make(map[int]WindTime)
 
@@ -110,6 +115,33 @@ func Schedule(){
 				nowReq := WatingQueue[0]
 				ServingQueue = append(ServingQueue, nowReq)
 				WatingQueue = WatingQueue[1:]
+			}
+		}
+
+		if SchedulerDB != nil {
+			airOrm := repository.AirConditionerOrm{Db: SchedulerDB}
+			all, err := airOrm.FindAll()
+			if err != nil {
+				log.Println(err)
+			} else {
+				for _, room := range all {
+					if room.Power != "on" {
+						continue
+					}
+					if room.Temperature != room.RoomTemperature {
+						if math.Abs(room.Temperature - room.RoomTemperature) < 0.5 {
+							room.RoomTemperature = room.Temperature
+						} else if room.Temperature > room.RoomTemperature {
+							room.RoomTemperature += 0.5
+						} else {
+							room.RoomTemperature -= 0.5
+						}
+						err := airOrm.Update(room)
+						if err != nil {
+							log.Println(err)
+						}
+					}
+				}
 			}
 		}
 
